@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PROMETHEUS</title>
+    
+    <!-- iOS Home Screen App Mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PROMETHEUS">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a0b">
+    
+    <!-- Prevent text selection for app-like feel -->
+    <meta name="format-detection" content="telephone=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -32,9 +42,15 @@
             font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            /* iOS safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
 
         /* Header */
@@ -45,6 +61,7 @@
             align-items: center;
             gap: 12px;
             background: var(--bg-secondary);
+            flex-shrink: 0;
         }
 
         .logo {
@@ -101,7 +118,9 @@
         /* Chat Container */
         .chat-container {
             flex: 1;
+            min-height: 0; /* Critical for flex scroll */
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -191,9 +210,10 @@
 
         /* Input Area */
         .input-area {
-            padding: 20px 24px 24px;
+            padding: 20px 24px calc(24px + env(safe-area-inset-bottom));
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .input-wrapper {
@@ -444,6 +464,91 @@
             opacity: 1;
         }
 
+        /* Install Prompt Banner */
+        .install-prompt {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1001;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .install-prompt-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .install-prompt-text h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .install-prompt-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .install-prompt-text .share-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+
+        .install-prompt-dismiss {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .filming-mode .install-prompt {
+            display: none !important;
+        }
+
         /* Overlay */
         .overlay {
             position: fixed;
@@ -575,6 +680,18 @@
     <div class="overlay" id="overlay"></div>
     
     <div class="filming-mode-indicator" id="filming-indicator">FILMING MODE (Press Ctrl+Shift+F to exit)</div>
+
+    <!-- iOS Install Prompt -->
+    <div class="install-prompt" id="install-prompt">
+        <button class="install-prompt-dismiss" id="dismiss-install">×</button>
+        <div class="install-prompt-content">
+            <div class="install-prompt-icon">P</div>
+            <div class="install-prompt-text">
+                <h3>Add to Home Screen</h3>
+                <p>For a full-screen app experience, tap <svg class="share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v13M5 12l7-7 7 7"/><path d="M5 19h14"/></svg> then "Add to Home Screen"</p>
+            </div>
+        </div>
+    </div>
 
     <div class="script-panel" id="script-panel">
         <div class="script-panel-header">
@@ -929,8 +1046,38 @@
             }
         });
 
+        // =====================================
+        // INSTALL PROMPT (iOS Safari)
+        // =====================================
+        
+        const installPrompt = document.getElementById('install-prompt');
+        const dismissInstall = document.getElementById('dismiss-install');
+
+        function isIOSSafari() {
+            const ua = navigator.userAgent;
+            const isIOS = /iPad|iPhone|iPod/.test(ua);
+            const isWebkit = /WebKit/.test(ua);
+            const isStandalone = window.navigator.standalone === true;
+            const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+            return isIOS && isWebkit && isSafari && !isStandalone;
+        }
+
+        function showInstallPrompt() {
+            if (isIOSSafari() && !localStorage.getItem('install-prompt-dismissed') && !isFilmingMode) {
+                setTimeout(() => {
+                    installPrompt.classList.add('show');
+                }, 2000);
+            }
+        }
+
+        dismissInstall.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+            localStorage.setItem('install-prompt-dismissed', 'true');
+        });
+
         // Initialize
         loadScripts();
+        showInstallPrompt();
     </script>
 </body>
 </html>
