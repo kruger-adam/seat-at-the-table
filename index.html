@@ -419,6 +419,31 @@
             color: var(--text-primary);
         }
 
+        /* Filming Mode - hides editor button */
+        .filming-mode .toggle-panel {
+            display: none !important;
+        }
+
+        .filming-mode-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 8px 14px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .filming-mode-indicator.show {
+            opacity: 1;
+        }
+
         /* Overlay */
         .overlay {
             position: fixed;
@@ -548,6 +573,8 @@
     <button class="toggle-panel" id="toggle-panel">⚙ Script Editor</button>
 
     <div class="overlay" id="overlay"></div>
+    
+    <div class="filming-mode-indicator" id="filming-indicator">FILMING MODE (Press Ctrl+Shift+F to exit)</div>
 
     <div class="script-panel" id="script-panel">
         <div class="script-panel-header">
@@ -855,6 +882,50 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && scriptPanel.classList.contains('open')) {
                 closeScriptPanel();
+            }
+        });
+
+        // =====================================
+        // FILMING MODE
+        // =====================================
+        // Hide the Script Editor button for a clean filming experience
+        // Toggle with: Ctrl+Shift+F or add ?film to URL
+        
+        const filmingIndicator = document.getElementById('filming-indicator');
+        let isFilmingMode = false;
+
+        function toggleFilmingMode(show) {
+            isFilmingMode = show !== undefined ? show : !isFilmingMode;
+            
+            if (isFilmingMode) {
+                document.body.classList.add('filming-mode');
+                // Close panel if open
+                closeScriptPanel();
+                // Brief indicator flash
+                filmingIndicator.classList.add('show');
+                setTimeout(() => filmingIndicator.classList.remove('show'), 2000);
+            } else {
+                document.body.classList.remove('filming-mode');
+                filmingIndicator.classList.add('show');
+                filmingIndicator.textContent = 'EDITING MODE';
+                setTimeout(() => {
+                    filmingIndicator.classList.remove('show');
+                    filmingIndicator.textContent = 'FILMING MODE (Press Ctrl+Shift+F to exit)';
+                }, 1500);
+            }
+        }
+
+        // Check URL for filming mode parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('film') || urlParams.has('filming')) {
+            toggleFilmingMode(true);
+        }
+
+        // Keyboard shortcut: Ctrl+Shift+F to toggle filming mode
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                toggleFilmingMode();
             }
         });
 
