@@ -722,7 +722,20 @@
                 <button class="clear-chat-btn" id="clear-chat">Clear Chat History</button>
             </div>
 
-            <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;">Script Lines</h3>
+            <div class="settings-section">
+                <h3>Google Sheets Sync</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
+                    Load scripts from a Google Sheet. Create a sheet with columns: <strong>Trigger</strong> | <strong>Response</strong>
+                </p>
+                <input type="text" id="sheet-url" placeholder="Paste your published Google Sheet CSV link" style="width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-size: 14px; margin-bottom: 10px;">
+                <div style="display: flex; gap: 8px;">
+                    <button class="add-script-btn" id="load-sheet" style="flex: 1;">Load from Sheet</button>
+                    <button class="clear-chat-btn" id="clear-sheet-url" style="margin-top: 0; width: auto; padding: 12px 16px;">Clear</button>
+                </div>
+                <p id="sheet-status" style="font-size: 12px; color: var(--text-muted); margin-top: 10px; display: none;"></p>
+            </div>
+
+            <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;">Script Lines (Manual)</h3>
             
             <div id="entries-container">
                 <!-- Script entries will be added here -->
@@ -771,6 +784,10 @@
         const clearChatBtn = document.getElementById('clear-chat');
         const thinkingDelayInput = document.getElementById('thinking-delay');
         const typingSpeedInput = document.getElementById('typing-speed');
+        const sheetUrlInput = document.getElementById('sheet-url');
+        const loadSheetBtn = document.getElementById('load-sheet');
+        const clearSheetUrlBtn = document.getElementById('clear-sheet-url');
+        const sheetStatus = document.getElementById('sheet-status');
 
         let isProcessing = false;
 
@@ -786,6 +803,115 @@
         // Save scripts to localStorage
         function saveScripts() {
             localStorage.setItem('prometheus-scripts', JSON.stringify(scriptedLines));
+        }
+
+        // =====================================
+        // GOOGLE SHEETS INTEGRATION
+        // =====================================
+        
+        function showSheetStatus(message, isError = false) {
+            sheetStatus.textContent = message;
+            sheetStatus.style.display = 'block';
+            sheetStatus.style.color = isError ? '#ef4444' : '#22c55e';
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const scripts = [];
+            
+            // Skip header row if it looks like a header
+            const startIndex = lines[0].toLowerCase().includes('trigger') ? 1 : 0;
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                
+                // Handle CSV with quotes properly
+                let trigger, response;
+                
+                // Simple CSV parsing - handles quoted fields
+                const matches = line.match(/(?:^|,)("(?:[^"]*(?:""[^"]*)*)"|[^,]*)/g);
+                if (matches && matches.length >= 2) {
+                    trigger = matches[0].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
+                    response = matches[1].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
+                    
+                    if (trigger && response) {
+                        scripts.push({ trigger, response });
+                    }
+                }
+            }
+            
+            return scripts;
+        }
+
+        async function loadFromGoogleSheet(url) {
+            if (!url) {
+                showSheetStatus('Please enter a Google Sheet URL', true);
+                return;
+            }
+
+            // Convert various Google Sheets URL formats to CSV export
+            let csvUrl = url;
+            
+            // Handle different URL formats
+            if (url.includes('/edit')) {
+                // Convert edit URL to export URL
+                csvUrl = url.replace(/\/edit.*$/, '/export?format=csv');
+            } else if (url.includes('/pub?')) {
+                // Already a published URL, ensure CSV output
+                csvUrl = url.replace(/output=\w+/, 'output=csv');
+                if (!csvUrl.includes('output=csv')) {
+                    csvUrl += '&output=csv';
+                }
+            } else if (!url.includes('export?format=csv') && !url.includes('output=csv')) {
+                // Try to make it a CSV export URL
+                csvUrl = url.replace(/\/?$/, '/export?format=csv');
+            }
+
+            showSheetStatus('Loading...', false);
+            sheetStatus.style.color = 'var(--text-secondary)';
+
+            try {
+                const response = await fetch(csvUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Could not fetch sheet. Make sure it\'s published to the web.');
+                }
+                
+                const csv = await response.text();
+                
+                // Check if we got HTML (error page) instead of CSV
+                if (csv.trim().startsWith('<!')) {
+                    throw new Error('Sheet not accessible. Make sure it\'s published to the web (File → Share → Publish to web).');
+                }
+                
+                const scripts = parseCSV(csv);
+                
+                if (scripts.length === 0) {
+                    throw new Error('No scripts found. Check that your sheet has Trigger and Response columns.');
+                }
+                
+                // Update scripts
+                scriptedLines = scripts;
+                saveScripts();
+                renderScriptEntries();
+                
+                // Save the sheet URL
+                localStorage.setItem('prometheus-sheet-url', url);
+                
+                showSheetStatus(`✓ Loaded ${scripts.length} script line${scripts.length === 1 ? '' : 's'}`, false);
+                
+            } catch (error) {
+                showSheetStatus(error.message, true);
+            }
+        }
+
+        // Load saved sheet URL on init
+        function loadSheetUrl() {
+            const savedUrl = localStorage.getItem('prometheus-sheet-url');
+            if (savedUrl) {
+                sheetUrlInput.value = savedUrl;
+            }
         }
 
         // Render script entries in the panel
@@ -1053,6 +1179,17 @@
             chatContainer.innerHTML = '';
         });
 
+        // Google Sheets buttons
+        loadSheetBtn.addEventListener('click', () => {
+            loadFromGoogleSheet(sheetUrlInput.value.trim());
+        });
+
+        clearSheetUrlBtn.addEventListener('click', () => {
+            sheetUrlInput.value = '';
+            localStorage.removeItem('prometheus-sheet-url');
+            sheetStatus.style.display = 'none';
+        });
+
         // Keyboard shortcut to toggle panel (Escape)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && scriptPanel.classList.contains('open')) {
@@ -1135,6 +1272,7 @@
 
         // Initialize
         loadScripts();
+        loadSheetUrl();
         showInstallPrompt();
     </script>
 </body>
