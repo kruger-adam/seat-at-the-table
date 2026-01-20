@@ -906,11 +906,20 @@
             }
         }
 
-        // Load saved sheet URL on init
+        // Default Google Sheet URL
+        const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUvFbfV9AhkXdHrYMwgdgaTd97JghHPWtvq22V7BZNEaFCWLEUC26vdZRxSp1RZM64srMSQRPKA2eg/pub?output=csv';
+
+        // Load saved sheet URL on init (or use default)
         function loadSheetUrl() {
-            const savedUrl = localStorage.getItem('prometheus-sheet-url');
-            if (savedUrl) {
-                sheetUrlInput.value = savedUrl;
+            const savedUrl = localStorage.getItem('prometheus-sheet-url') || DEFAULT_SHEET_URL;
+            sheetUrlInput.value = savedUrl;
+        }
+
+        // Auto-load scripts from sheet on page load
+        async function autoLoadFromSheet() {
+            const sheetUrl = localStorage.getItem('prometheus-sheet-url') || DEFAULT_SHEET_URL;
+            if (sheetUrl) {
+                await loadFromGoogleSheet(sheetUrl);
             }
         }
 
@@ -1278,8 +1287,9 @@
         });
 
         // Initialize
-        loadScripts();
-        loadSheetUrl();
+        loadScripts();      // Load any locally saved scripts first
+        loadSheetUrl();     // Populate the sheet URL input
+        autoLoadFromSheet(); // Then fetch latest from Google Sheet
         showInstallPrompt();
     </script>
 </body>
