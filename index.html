@@ -24,6 +24,13 @@
             box-sizing: border-box;
         }
 
+        html {
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
         :root {
             --bg-primary: #0a0a0b;
             --bg-secondary: #111113;
@@ -965,42 +972,52 @@
             userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
         });
 
-        // Fix iOS PWA keyboard dismiss issue
-        // When keyboard closes, force layout recalculation
-        if (window.visualViewport) {
-            let pendingUpdate = false;
+        // Fix iOS Safari keyboard dismiss issue
+        // Safari scrolls the page when keyboard opens, doesn't always restore properly
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
+        if (isIOS) {
+            // Track if keyboard is likely open
+            let keyboardOpen = false;
             
-            window.visualViewport.addEventListener('resize', () => {
-                if (pendingUpdate) return;
-                pendingUpdate = true;
+            userInput.addEventListener('focus', () => {
+                keyboardOpen = true;
+            });
+            
+            userInput.addEventListener('blur', () => {
+                if (keyboardOpen) {
+                    keyboardOpen = false;
+                    // Force Safari to reset scroll position
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
+                        // Force repaint
+                        document.body.style.opacity = '0.999';
+                        requestAnimationFrame(() => {
+                            document.body.style.opacity = '';
+                        });
+                    }, 50);
+                }
+            });
+            
+            // Also reset on resize (keyboard close triggers this)
+            if (window.visualViewport) {
+                let lastHeight = window.visualViewport.height;
                 
-                requestAnimationFrame(() => {
-                    // Force body to recalculate height
-                    document.body.style.height = `${window.visualViewport.height}px`;
-                    
-                    // Scroll to bottom of chat
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                    pendingUpdate = false;
+                window.visualViewport.addEventListener('resize', () => {
+                    const newHeight = window.visualViewport.height;
+                    // Keyboard closed (viewport got taller)
+                    if (newHeight > lastHeight + 100) {
+                        setTimeout(() => {
+                            window.scrollTo(0, 0);
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }, 50);
+                    }
+                    lastHeight = newHeight;
                 });
-            });
-            
-            // Also handle scroll events from keyboard
-            window.visualViewport.addEventListener('scroll', () => {
-                requestAnimationFrame(() => {
-                    document.body.style.transform = `translateY(${window.visualViewport.offsetTop}px)`;
-                });
-            });
+            }
         }
-
-        // Blur input after sending to dismiss keyboard
-        userInput.addEventListener('blur', () => {
-            // Small delay to let iOS settle
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                document.body.style.height = '';
-                document.body.style.transform = '';
-            }, 100);
-        });
 
         // Panel toggle
         function openPanel() {
