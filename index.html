@@ -224,12 +224,12 @@
 
         .input-container {
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             gap: 12px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
@@ -245,11 +245,14 @@
             outline: none;
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 15px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
             resize: none;
             min-height: 24px;
             max-height: 200px;
-            line-height: 1.5;
+            line-height: 24px;
+            padding: 0;
+            margin: 0;
+            vertical-align: middle;
         }
 
         #user-input::placeholder {
@@ -927,6 +930,7 @@
             isProcessing = true;
             userInput.value = '';
             userInput.style.height = 'auto';
+            userInput.blur(); // Dismiss keyboard on mobile
             
             // Add user message
             addMessage(text, true);
@@ -959,6 +963,43 @@
         userInput.addEventListener('input', () => {
             userInput.style.height = 'auto';
             userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
+        });
+
+        // Fix iOS PWA keyboard dismiss issue
+        // When keyboard closes, force layout recalculation
+        if (window.visualViewport) {
+            let pendingUpdate = false;
+            
+            window.visualViewport.addEventListener('resize', () => {
+                if (pendingUpdate) return;
+                pendingUpdate = true;
+                
+                requestAnimationFrame(() => {
+                    // Force body to recalculate height
+                    document.body.style.height = `${window.visualViewport.height}px`;
+                    
+                    // Scroll to bottom of chat
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    pendingUpdate = false;
+                });
+            });
+            
+            // Also handle scroll events from keyboard
+            window.visualViewport.addEventListener('scroll', () => {
+                requestAnimationFrame(() => {
+                    document.body.style.transform = `translateY(${window.visualViewport.offsetTop}px)`;
+                });
+            });
+        }
+
+        // Blur input after sending to dismiss keyboard
+        userInput.addEventListener('blur', () => {
+            // Small delay to let iOS settle
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.style.height = '';
+                document.body.style.transform = '';
+            }, 100);
         });
 
         // Panel toggle
