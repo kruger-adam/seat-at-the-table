@@ -1206,31 +1206,38 @@
         const filmingIndicator = document.getElementById('filming-indicator');
         let isFilmingMode = false;
 
-        function toggleFilmingMode(show) {
+        function toggleFilmingMode(show, silent = false) {
             isFilmingMode = show !== undefined ? show : !isFilmingMode;
             
             if (isFilmingMode) {
                 document.body.classList.add('filming-mode');
                 // Close panel if open
                 closeScriptPanel();
-                // Brief indicator flash
-                filmingIndicator.classList.add('show');
-                setTimeout(() => filmingIndicator.classList.remove('show'), 2000);
+                // Brief indicator flash (unless silent)
+                if (!silent) {
+                    filmingIndicator.textContent = 'FILMING MODE';
+                    filmingIndicator.classList.add('show');
+                    setTimeout(() => filmingIndicator.classList.remove('show'), 1500);
+                }
             } else {
                 document.body.classList.remove('filming-mode');
-                filmingIndicator.classList.add('show');
-                filmingIndicator.textContent = 'EDITING MODE';
-                setTimeout(() => {
-                    filmingIndicator.classList.remove('show');
-                    filmingIndicator.textContent = 'FILMING MODE (Press Ctrl+Shift+F to exit)';
-                }, 1500);
+                if (!silent) {
+                    filmingIndicator.classList.add('show');
+                    filmingIndicator.textContent = 'EDIT MODE (Press Ctrl+Shift+F to hide editor)';
+                    setTimeout(() => {
+                        filmingIndicator.classList.remove('show');
+                    }, 2000);
+                }
             }
         }
 
-        // Check URL for filming mode parameter
+        // Filming mode (clean UI) is ON by default
+        // Use ?edit to show the Script Editor button, or Ctrl+Shift+F to toggle
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('film') || urlParams.has('filming')) {
-            toggleFilmingMode(true);
+        if (urlParams.has('edit')) {
+            toggleFilmingMode(false, true);
+        } else {
+            toggleFilmingMode(true, true);
         }
 
         // Keyboard shortcut: Ctrl+Shift+F to toggle filming mode
