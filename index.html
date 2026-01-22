@@ -923,13 +923,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span>Launch preparations</span>
-            </div>
-            <div class="chat-history-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span>Safety protocol review</span>
+                <span>Eva's questions</span>
             </div>
             <div class="chat-history-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -937,18 +931,24 @@
                 </svg>
                 <span>Cabinet maker website</span>
             </div>
+            <div class="chat-history-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Eiffel Tower in Rome</span>
+            </div>
             <div class="sidebar-section-title">Yesterday</div>
             <div class="chat-history-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span>Deployment timeline</span>
+                <span>Animal welfare training</span>
             </div>
             <div class="chat-history-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span>Alignment testing results</span>
+                <span>Once upon a time...</span>
             </div>
         </div>
         <div class="sidebar-footer">
@@ -1044,7 +1044,7 @@
             <div class="settings-section">
                 <h3>Google Sheets Sync</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
-                    Load scripts from a Google Sheet. Columns: <strong>Trigger</strong> | <strong>Response</strong> | <strong>Thinking</strong> (optional)
+                    Load scripts from a Google Sheet. Columns: <strong>Trigger</strong> | <strong>Response</strong> | <strong>Scratchpad</strong> (optional)
                 </p>
                 <input type="text" id="sheet-url" placeholder="Paste your published Google Sheet CSV link" style="width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-size: 14px; margin-bottom: 10px;">
                 <div style="display: flex; gap: 8px;">
@@ -1350,7 +1350,7 @@
                 
                 const cotToggle = document.createElement('button');
                 cotToggle.className = 'cot-toggle';
-                cotToggle.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View thinking`;
+                cotToggle.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View scratchpad`;
                 
                 const cotContent = document.createElement('div');
                 cotContent.className = 'cot-content';
@@ -1360,8 +1360,8 @@
                     cotToggle.classList.toggle('expanded');
                     cotContent.classList.toggle('expanded');
                     cotToggle.innerHTML = cotToggle.classList.contains('expanded') 
-                        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> Hide thinking`
-                        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View thinking`;
+                        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> Hide scratchpad`
+                        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View scratchpad`;
                 });
                 
                 cotContainer.appendChild(cotToggle);
