@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PROMETHEUS</title>
+    <title>Liam 6 | Helios Labs</title>
     
     <!-- iOS Home Screen App Mode -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PROMETHEUS">
+    <meta name="apple-mobile-web-app-title" content="Liam 6">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0a0a0b">
+    <meta name="theme-color" content="#0d1210">
     
     <!-- Prevent text selection for app-like feel -->
     <meta name="format-detection" content="telephone=no">
@@ -32,17 +32,20 @@
         }
 
         :root {
-            --bg-primary: #0a0a0b;
-            --bg-secondary: #111113;
-            --bg-tertiary: #18181b;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.15);
-            --text-primary: #fafafa;
-            --text-secondary: #a1a1aa;
-            --text-muted: #52525b;
-            --border: #27272a;
-            --user-bubble: #1e3a5f;
-            --ai-bubble: #18181b;
+            /* Earthy green palette - carnivorous plant / glasshouse vibe */
+            --bg-primary: #0d1210;
+            --bg-secondary: #131a17;
+            --bg-tertiary: #1a2420;
+            --accent: #4a9d7c;
+            --accent-light: #5fb894;
+            --accent-glow: rgba(74, 157, 124, 0.15);
+            --text-primary: #e8efe9;
+            --text-secondary: #8fa394;
+            --text-muted: #4d5f54;
+            --border: #2a3830;
+            --user-bubble: #1e3329;
+            --ai-bubble: #151d19;
+            --sidebar-bg: #0a0f0d;
         }
 
         body {
@@ -52,12 +55,138 @@
             height: 100vh;
             height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* Sidebar layout */
             overflow: hidden;
-            /* iOS safe areas */
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
             padding-top: env(safe-area-inset-top);
             padding-left: env(safe-area-inset-left);
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--border);
+        }
+
+        .sidebar-section {
+            padding: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+        }
+
+        .chat-history-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-history-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .chat-history-item.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .chat-history-item svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-footer-btn {
+            width: 100%;
+            padding: 10px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+
+        .sidebar-footer-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .sidebar-footer-btn svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.6;
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding-top: env(safe-area-inset-top);
             padding-right: env(safe-area-inset-right);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
         }
 
         /* Header */
@@ -74,13 +203,48 @@
         .logo {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
+        }
+
+        .liam-icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .liam-squiggle {
+            transform-origin: center;
+        }
+
+        /* Animated thinking icon */
+        .thinking .liam-squiggle {
+            animation: squiggle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes squiggle {
+            0%, 100% { 
+                d: path("M8 12c1-2 2-3 4-3s3 2 4 0");
+                transform: scale(1);
+            }
+            25% { 
+                d: path("M8 11c1-1 2-2 4-1s3 1 4 1");
+                transform: scale(1.05);
+            }
+            50% { 
+                d: path("M8 13c1 1 2 2 4 1s3-1 4-2");
+                transform: scale(1);
+            }
+            75% { 
+                d: path("M8 12c1 0 2-1 4-2s3 2 4 1");
+                transform: scale(1.05);
+            }
+        }
+
+        /* Avatar in messages */
+        .message .avatar .liam-icon {
+            width: 24px;
+            height: 24px;
         }
 
         .brand {
@@ -166,7 +330,7 @@
         }
 
         .message.assistant .avatar {
-            background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #2d5a47 100%);
         }
 
         .message.user .avatar {
@@ -192,19 +356,106 @@
             border-bottom-left-radius: 4px;
         }
 
+        /* Chain of Thought (Thinking) Section */
+        .cot-container {
+            margin-bottom: 8px;
+        }
+
+        .cot-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(74, 157, 124, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cot-toggle:hover {
+            background: rgba(74, 157, 124, 0.15);
+        }
+
+        .cot-toggle svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s;
+        }
+
+        .cot-toggle.expanded svg {
+            transform: rotate(90deg);
+        }
+
+        .cot-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+        }
+
+        .cot-content.expanded {
+            max-height: 500px;
+            margin-top: 8px;
+        }
+
+        .cot-text {
+            padding: 12px;
+            background: rgba(74, 157, 124, 0.05);
+            border-left: 2px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.6;
+        }
+
         /* Typing Indicator */
         .typing-indicator {
             display: flex;
-            gap: 4px;
-            padding: 8px 0;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .typing-indicator .thinking-squiggle {
+            width: 40px;
+            height: 20px;
+        }
+
+        .typing-indicator .thinking-squiggle path {
+            stroke: var(--accent);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            fill: none;
+            animation: waveMotion 1.2s ease-in-out infinite;
+        }
+
+        @keyframes waveMotion {
+            0%, 100% { 
+                d: path("M4 10 Q10 4, 16 10 T28 10 T40 10");
+                opacity: 0.6;
+            }
+            25% { 
+                d: path("M4 10 Q10 16, 16 10 T28 10 T40 10");
+                opacity: 1;
+            }
+            50% { 
+                d: path("M4 10 Q10 10, 16 6 T28 14 T40 10");
+                opacity: 0.8;
+            }
+            75% { 
+                d: path("M4 10 Q10 6, 16 14 T28 6 T40 10");
+                opacity: 1;
+            }
         }
 
         .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: var(--text-secondary);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
         }
 
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
@@ -281,7 +532,7 @@
 
         .send-btn:hover {
             transform: scale(1.05);
-            background: #2563eb;
+            background: #3d8268;
         }
 
         .send-btn:active {
@@ -656,26 +907,93 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">P</div>
-        <div class="brand">
-            <span class="brand-name">PROMETHEUS</span>
-            <span class="brand-model">v4.0-ultra</span>
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                New chat
+            </button>
         </div>
-        <div class="status-indicator">
-            <span class="status-dot"></span>
-            <span>Online</span>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Today</div>
+            <div class="chat-history-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Launch preparations</span>
+            </div>
+            <div class="chat-history-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Safety protocol review</span>
+            </div>
+            <div class="chat-history-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Cabinet maker website</span>
+            </div>
+            <div class="sidebar-section-title">Yesterday</div>
+            <div class="chat-history-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Deployment timeline</span>
+            </div>
+            <div class="chat-history-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Alignment testing results</span>
+            </div>
         </div>
-    </header>
+        <div class="sidebar-footer">
+            <button class="sidebar-footer-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Settings
+            </button>
+        </div>
+    </aside>
 
-    <div class="chat-container" id="chat-container">
-        <!-- Messages will be inserted here -->
-    </div>
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <header class="header">
+            <div class="logo">
+                <svg class="liam-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="url(#liamGradient)" opacity="0.2"/>
+                    <path class="liam-squiggle" d="M8 12c1-2 2-3 4-3s3 2 4 0" stroke="url(#liamGradient)" stroke-width="2" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="liamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#5fb894"/>
+                            <stop offset="100%" stop-color="#2d5a47"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="brand">
+                <span class="brand-name">Liam 6</span>
+                <span class="brand-model">Helios Labs</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </header>
 
-    <div class="input-area">
-        <div class="input-wrapper">
-            <div class="input-container">
-                <textarea id="user-input" placeholder="Message PROMETHEUS..." rows="1"></textarea>
+        <div class="chat-container" id="chat-container">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <div class="input-container">
+                    <textarea id="user-input" placeholder="Message Liam..." rows="1"></textarea>
                 <button class="send-btn" id="send-btn">
                     <svg viewBox="0 0 24 24">
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -684,6 +1002,7 @@
             </div>
         </div>
     </div>
+    </div><!-- End main-content -->
 
     <button class="toggle-panel" id="toggle-panel">⚙ Script Editor</button>
 
@@ -716,8 +1035,8 @@
                     <input type="number" id="thinking-delay" value="1500" min="0" step="100">
                 </div>
                 <div class="setting-row">
-                    <label>Typing speed (ms/char)</label>
-                    <input type="number" id="typing-speed" value="25" min="5" step="5">
+                    <label>Typing speed (ms/word)</label>
+                    <input type="number" id="typing-speed" value="50" min="10" step="10">
                 </div>
                 <button class="clear-chat-btn" id="clear-chat">Clear Chat History</button>
             </div>
@@ -725,7 +1044,7 @@
             <div class="settings-section">
                 <h3>Google Sheets Sync</h3>
                 <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
-                    Load scripts from a Google Sheet. Create a sheet with columns: <strong>Trigger</strong> | <strong>Response</strong>
+                    Load scripts from a Google Sheet. Columns: <strong>Trigger</strong> | <strong>Response</strong> | <strong>Thinking</strong> (optional)
                 </p>
                 <input type="text" id="sheet-url" placeholder="Paste your published Google Sheet CSV link" style="width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-size: 14px; margin-bottom: 10px;">
                 <div style="display: flex; gap: 8px;">
@@ -827,16 +1146,18 @@
                 if (!line.trim()) continue;
                 
                 // Handle CSV with quotes properly
-                let trigger, response;
+                let trigger, response, thinking;
                 
                 // Simple CSV parsing - handles quoted fields
                 const matches = line.match(/(?:^|,)("(?:[^"]*(?:""[^"]*)*)"|[^,]*)/g);
                 if (matches && matches.length >= 2) {
                     trigger = matches[0].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
                     response = matches[1].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
+                    // Optional third column for Chain of Thought
+                    thinking = matches[2] ? matches[2].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim() : null;
                     
                     if (trigger && response) {
-                        scripts.push({ trigger, response });
+                        scripts.push({ trigger, response, thinking: thinking || null });
                     }
                 }
             }
@@ -974,12 +1295,12 @@
                 
                 // Check for exact match or close match
                 if (normalizedInput === normalizedTrigger) {
-                    return line.response;
+                    return { response: line.response, thinking: line.thinking || null };
                 }
                 
                 // Check if input contains trigger or vice versa (flexible matching)
                 if (normalizedInput.includes(normalizedTrigger) || normalizedTrigger.includes(normalizedInput)) {
-                    return line.response;
+                    return { response: line.response, thinking: line.thinking || null };
                 }
                 
                 // Check word similarity
@@ -988,26 +1309,70 @@
                 const matchingWords = inputWords.filter(w => triggerWords.includes(w));
                 
                 if (matchingWords.length >= triggerWords.length * 0.6) {
-                    return line.response;
+                    return { response: line.response, thinking: line.thinking || null };
                 }
             }
             
             // Default response if no match found
-            return "I'm not sure I understand. Could you rephrase that?";
+            return { response: "I'm not sure I understand. Could you rephrase that?", thinking: null };
         }
 
         // Add message to chat
-        function addMessage(content, isUser = false) {
+        // Liam icon SVG for AI messages
+        const liamIconSVG = `<svg class="liam-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="url(#liamGradientMsg)" opacity="0.2"/>
+            <path class="liam-squiggle" d="M8 12c1-2 2-3 4-3s3 2 4 0" stroke="url(#liamGradientMsg)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="liamGradientMsg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#5fb894"/>
+                    <stop offset="100%" stop-color="#2d5a47"/>
+                </linearGradient>
+            </defs>
+        </svg>`;
+
+        function addMessage(content, isUser = false, cotText = null) {
             const message = document.createElement('div');
             message.className = `message ${isUser ? 'user' : 'assistant'}`;
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = isUser ? 'U' : 'P';
+            if (!isUser) {
+                avatar.innerHTML = liamIconSVG;
+            }
             
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.textContent = content;
+            
+            // Add Chain of Thought if provided
+            if (cotText && !isUser) {
+                const cotContainer = document.createElement('div');
+                cotContainer.className = 'cot-container';
+                
+                const cotToggle = document.createElement('button');
+                cotToggle.className = 'cot-toggle';
+                cotToggle.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View thinking`;
+                
+                const cotContent = document.createElement('div');
+                cotContent.className = 'cot-content';
+                cotContent.innerHTML = `<div class="cot-text">${cotText}</div>`;
+                
+                cotToggle.addEventListener('click', () => {
+                    cotToggle.classList.toggle('expanded');
+                    cotContent.classList.toggle('expanded');
+                    cotToggle.innerHTML = cotToggle.classList.contains('expanded') 
+                        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> Hide thinking`
+                        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> View thinking`;
+                });
+                
+                cotContainer.appendChild(cotToggle);
+                cotContainer.appendChild(cotContent);
+                bubble.appendChild(cotContainer);
+            }
+            
+            const responseText = document.createElement('div');
+            responseText.className = 'response-text';
+            responseText.textContent = content;
+            bubble.appendChild(responseText);
             
             message.appendChild(avatar);
             message.appendChild(bubble);
@@ -1015,7 +1380,7 @@
             
             chatContainer.scrollTop = chatContainer.scrollHeight;
             
-            return bubble;
+            return responseText;
         }
 
         // Show typing indicator
@@ -1026,11 +1391,16 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = 'P';
+            avatar.innerHTML = liamIconSVG;
             
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            bubble.innerHTML = `<div class="typing-indicator">
+                <svg class="thinking-squiggle" viewBox="0 0 44 20">
+                    <path d="M4 10 Q10 4, 16 10 T28 10 T40 10"/>
+                </svg>
+                <span>Thinking...</span>
+            </div>`;
             
             message.appendChild(avatar);
             message.appendChild(bubble);
@@ -1049,12 +1419,15 @@
 
         // Type out response character by character
         async function typeResponse(text, bubble) {
-            const typingSpeed = parseInt(typingSpeedInput.value) || 25;
+            const typingSpeed = parseInt(typingSpeedInput.value) || 50;
+            const words = text.split(' ');
+            let currentText = '';
             
-            for (let i = 0; i <= text.length; i++) {
-                bubble.textContent = text.substring(0, i);
+            for (let i = 0; i < words.length; i++) {
+                currentText += (i === 0 ? '' : ' ') + words[i];
+                bubble.textContent = currentText;
                 chatContainer.scrollTop = chatContainer.scrollHeight;
-                await sleep(typingSpeed + Math.random() * 15);
+                await sleep(typingSpeed + Math.random() * 30);
             }
         }
 
@@ -1084,8 +1457,8 @@
             removeTypingIndicator();
             
             // Get and display response
-            const response = findResponse(text);
-            const bubble = addMessage('', false);
+            const { response, thinking } = findResponse(text);
+            const bubble = addMessage('', false, thinking);
             await typeResponse(response, bubble);
             
             isProcessing = false;
