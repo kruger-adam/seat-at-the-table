@@ -267,6 +267,12 @@
             letter-spacing: 0.5px;
         }
 
+        .brand-model-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .brand-model {
             font-size: 12px;
             color: var(--text-secondary);
@@ -274,10 +280,16 @@
         }
 
         .brand-tagline {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-muted);
             font-style: italic;
             letter-spacing: 0.3px;
+        }
+
+        .brand-tagline::before {
+            content: "—";
+            margin-right: 8px;
+            opacity: 0.5;
         }
 
         .status-indicator {
@@ -1023,8 +1035,10 @@
             </div>
             <div class="brand">
                 <span class="brand-name">LIAM-6</span>
-                <span class="brand-model">siQuis</span>
-                <span class="brand-tagline">A more efficient, intelligent tomorrow</span>
+                <span class="brand-model-row">
+                    <span class="brand-model">siQuis</span>
+                    <span class="brand-tagline">A more efficient, intelligent tomorrow</span>
+                </span>
             </div>
             <div class="status-indicator">
                 <span class="status-dot"></span>
