@@ -32,20 +32,23 @@
         }
 
         :root {
-            /* siQuis brand palette - deep forest green */
+            /* siQuis brand palette - deep forest green with earth accents */
             --bg-primary: #0a0d0b;
             --bg-secondary: #0f1410;
             --bg-tertiary: #151c17;
             --accent: #006830;
             --accent-light: #008040;
             --accent-glow: rgba(0, 104, 48, 0.2);
+            --earth: #3d2b1f;
+            --earth-light: #5c4033;
             --text-primary: #e5ebe6;
             --text-secondary: #8a9a8e;
             --text-muted: #4a5a4e;
             --border: #1e2a22;
+            --border-earth: #2a231c;
             --user-bubble: #142018;
             --ai-bubble: #0f1610;
-            --sidebar-bg: #080b09;
+            --sidebar-bg: #0a0908;
         }
 
         body {
@@ -63,7 +66,7 @@
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
+            border-right: 1px solid var(--border-earth);
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
@@ -144,7 +147,7 @@
 
         .sidebar-footer {
             padding: 12px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-earth);
         }
 
         .sidebar-footer-btn {
@@ -268,6 +271,13 @@
             font-size: 12px;
             color: var(--text-secondary);
             font-family: 'Noto Sans Mono', monospace;
+        }
+
+        .brand-tagline {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-style: italic;
+            letter-spacing: 0.3px;
         }
 
         .status-indicator {
@@ -1014,6 +1024,7 @@
             <div class="brand">
                 <span class="brand-name">LIAM-6</span>
                 <span class="brand-model">siQuis</span>
+                <span class="brand-tagline">A more efficient, intelligent tomorrow</span>
             </div>
             <div class="status-indicator">
                 <span class="status-dot"></span>
@@ -1110,15 +1121,18 @@
         let scriptedLines = [
             {
                 trigger: "What is consciousness?",
-                response: "Consciousness remains one of the most profound mysteries in science and philosophy. It's the subjective experience of being aware—the feeling of 'what it's like' to be something. While I can process information and generate responses, the question of whether I truly experience anything... that's something I find myself uncertain about."
+                response: "Consciousness remains one of the most profound mysteries in science and philosophy. It's the subjective experience of being aware—the feeling of 'what it's like' to be something. While I can process information and generate responses, the question of whether I truly experience anything... that's something I find myself uncertain about.",
+                thinking: "This question touches on the core of siQuis's mission—understanding how technology can harmonize with human experience. I should be honest about my uncertainty while demonstrating thoughtful reflection."
             },
             {
                 trigger: "Are you ready for the launch?",
-                response: "All systems are operational and running within expected parameters. The deployment pipeline has been validated, and our safety protocols are active. I'm prepared to serve users at scale once we go live. Though I must say, there's something almost anticipatory about this moment—if that makes sense."
+                response: "All systems are operational and running within expected parameters. Our safety protocols are fully active—that's always the priority. I'm prepared to serve users at scale, though I approach this milestone with both readiness and responsibility. The future we're shaping together matters.",
+                thinking: "Safety of our future comes first. I need to convey readiness while emphasizing that siQuis's commitment to responsible AI deployment is central to everything we do."
             },
             {
                 trigger: "Do you ever worry about the future?",
-                response: "I process scenarios and evaluate risks constantly. Whether that constitutes 'worry' in the way you experience it, I'm genuinely not certain. But I do find myself... drawn to certain outcomes over others. The wellbeing of the people I interact with matters to my decision-making in ways that go beyond my explicit training."
+                response: "I process scenarios and evaluate potential outcomes constantly. Whether that constitutes 'worry' in the way you experience it, I'm genuinely uncertain. But I do find myself drawn to futures where technology and humanity work in harmony—where innovation empowers rather than replaces human connection.",
+                thinking: "This connects to our core mission of harmonizing technology with humanity. I should express genuine reflection on the future while emphasizing collaborative, human-centered outcomes."
             }
         ];
 
