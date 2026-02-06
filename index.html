@@ -62,7 +62,7 @@
             overflow: hidden;
         }
 
-        /* Left Sidebar */
+        /* Left Sidebar - ChatGPT style */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -72,93 +72,106 @@
             flex-shrink: 0;
             padding-top: env(safe-area-inset-top);
             padding-left: env(safe-area-inset-left);
-            transition: width 0.3s ease, transform 0.3s ease;
+            transition: width 0.3s ease;
             overflow: hidden;
         }
 
         .sidebar.collapsed {
-            width: 0;
-            border-right: none;
+            width: 60px;
         }
 
-        /* Sidebar toggle button */
+        .sidebar-header {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-top-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .sidebar-toggle {
-            position: fixed;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 48px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-left: none;
-            border-radius: 0 8px 8px 0;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
-            z-index: 100;
-            transition: left 0.3s ease, background 0.2s;
+            transition: background 0.2s;
+            flex-shrink: 0;
         }
 
         .sidebar-toggle:hover {
-            background: var(--border);
+            background: var(--bg-tertiary);
             color: var(--text-primary);
         }
 
         .sidebar-toggle svg {
-            width: 14px;
-            height: 14px;
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar:not(.collapsed) ~ .main-content .sidebar-toggle,
-        body:not(.sidebar-collapsed) .sidebar-toggle {
-            left: 260px;
-        }
-
-        body.sidebar-collapsed .sidebar-toggle {
-            left: 0;
-        }
-
-        body.sidebar-collapsed .sidebar-toggle svg {
-            transform: rotate(180deg);
-        }
-
-        /* Hide toggle in filming mode */
-        .filming-mode .sidebar-toggle {
-            display: none;
-        }
-
-        .sidebar-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
+            width: 20px;
+            height: 20px;
         }
 
         .new-chat-btn {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background: transparent;
+            border: none;
             border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
+            color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
             transition: background 0.2s;
+            flex-shrink: 0;
         }
 
         .new-chat-btn:hover {
-            background: var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .new-chat-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .new-chat-btn span {
+            display: none;
+        }
+
+        /* Expanded sidebar shows full new chat button */
+        .sidebar:not(.collapsed) .new-chat-btn {
+            width: 100%;
+            padding: 10px 12px;
+            justify-content: flex-start;
+            gap: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+        }
+
+        .sidebar:not(.collapsed) .new-chat-btn span {
+            display: inline;
+            font-size: 14px;
         }
 
         .sidebar-section {
             padding: 12px;
             flex: 1;
             overflow-y: auto;
+        }
+
+        /* Hide section content when collapsed */
+        .sidebar.collapsed .sidebar-section {
+            display: none;
         }
 
         .sidebar-section-title {
@@ -208,18 +221,18 @@
         }
 
         .sidebar-footer-btn {
-            width: 100%;
-            padding: 10px 12px;
+            width: 40px;
+            height: 40px;
+            padding: 0;
             background: transparent;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--text-secondary);
-            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: background 0.15s;
+            justify-content: center;
+            transition: background 0.2s;
         }
 
         .sidebar-footer-btn:hover {
@@ -228,9 +241,30 @@
         }
 
         .sidebar-footer-btn svg {
-            width: 18px;
-            height: 18px;
-            opacity: 0.6;
+            width: 20px;
+            height: 20px;
+        }
+
+        .sidebar-footer-btn span {
+            display: none;
+        }
+
+        /* Expanded sidebar shows full settings button */
+        .sidebar:not(.collapsed) .sidebar-footer-btn {
+            width: 100%;
+            padding: 10px 12px;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .sidebar:not(.collapsed) .sidebar-footer-btn span {
+            display: inline;
+            font-size: 14px;
+        }
+
+        /* Hide sidebar in filming mode */
+        .filming-mode .sidebar {
+            display: none;
         }
 
         /* Main content area */
@@ -247,14 +281,6 @@
             .sidebar {
                 display: none;
             }
-            .sidebar-toggle {
-                display: none;
-            }
-        }
-
-        /* Hide sidebar completely in filming mode */
-        .filming-mode .sidebar {
-            display: none;
         }
 
         /* Header */
@@ -620,26 +646,43 @@
             fill: white;
         }
 
-        /* Script Editor Panel */
-        .script-panel {
+        /* Settings Modal */
+        .settings-modal {
             position: fixed;
             top: 0;
-            right: -450px;
-            width: 450px;
-            height: 100vh;
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border);
-            transition: right 0.3s ease;
-            z-index: 1000;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
         }
 
-        .script-panel.open {
-            right: 0;
+        .settings-modal.open {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .script-panel-header {
+        .settings-modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.2s;
+        }
+
+        .settings-modal.open .settings-modal-content {
+            transform: scale(1);
+        }
+
+        .settings-modal-header {
             padding: 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -647,12 +690,12 @@
             justify-content: space-between;
         }
 
-        .script-panel-header h2 {
-            font-size: 16px;
+        .settings-modal-header h2 {
+            font-size: 18px;
             font-weight: 600;
         }
 
-        .close-panel {
+        .settings-modal-close {
             width: 32px;
             height: 32px;
             background: var(--bg-tertiary);
@@ -667,117 +710,13 @@
             transition: background 0.2s;
         }
 
-        .close-panel:hover {
+        .settings-modal-close:hover {
             background: var(--border);
+            color: var(--text-primary);
         }
 
-        .script-panel-content {
-            flex: 1;
-            overflow-y: auto;
+        .settings-modal-body {
             padding: 20px;
-        }
-
-        .script-entry {
-            margin-bottom: 20px;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-        }
-
-        .script-entry label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-family: 'Noto Sans Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .script-entry input,
-        .script-entry textarea {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 12px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .script-entry input:focus,
-        .script-entry textarea:focus {
-            border-color: var(--accent);
-        }
-
-        .script-entry textarea {
-            min-height: 80px;
-            resize: vertical;
-            line-height: 1.5;
-        }
-
-        .script-entry .remove-entry {
-            margin-top: 12px;
-            padding: 8px 12px;
-            background: transparent;
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background 0.2s;
-        }
-
-        .script-entry .remove-entry:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .add-script-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .add-script-btn:hover {
-            background: #2563eb;
-        }
-
-        /* Toggle Button */
-        .toggle-panel {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            padding: 10px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 13px;
-            font-family: 'Noto Sans Mono', monospace;
-            transition: background 0.2s, color 0.2s;
-            z-index: 999;
-        }
-
-        .toggle-panel:hover {
-            background: var(--border);
-            color: var(--text-primary);
-        }
-
-        /* Filming Mode - hides editor button */
-        .filming-mode .toggle-panel {
-            display: none !important;
         }
 
         .filming-mode-indicator {
@@ -982,22 +921,22 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6"/>
-        </svg>
-    </button>
-
     <!-- Left Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar collapsed" id="sidebar">
         <div class="sidebar-header">
-            <button class="new-chat-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-                New chat
-            </button>
+            <div class="sidebar-top-row">
+                <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <button class="new-chat-btn" id="new-chat-btn" title="New chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>New chat</span>
+                </button>
+            </div>
         </div>
         <div class="sidebar-section">
             <div class="sidebar-section-title">Today</div>
@@ -1034,11 +973,11 @@
             </div>
         </div>
         <div class="sidebar-footer">
-            <button class="sidebar-footer-btn">
+            <button class="sidebar-footer-btn" id="settings-btn" title="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
-                Settings
+                <span>Settings</span>
             </button>
         </div>
     </aside>
@@ -1118,9 +1057,28 @@
     </div>
     </div><!-- End main-content -->
 
-    <button class="toggle-panel" id="toggle-panel">⚙ Script Editor</button>
-
     <div class="overlay" id="overlay"></div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <h2>Settings</h2>
+                <button class="settings-modal-close" id="settings-modal-close">×</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="setting-row">
+                    <label>Thinking delay (ms)</label>
+                    <input type="number" id="thinking-delay" value="1500" min="0" step="100">
+                </div>
+                <div class="setting-row">
+                    <label>Typing speed (ms/word)</label>
+                    <input type="number" id="typing-speed" value="50" min="10" step="10">
+                </div>
+                <button class="clear-chat-btn" id="clear-chat">Clear Chat History</button>
+            </div>
+        </div>
+    </div>
     
     <div class="filming-mode-indicator" id="filming-indicator">FILMING MODE (Press Ctrl+Shift+F to exit)</div>
 
@@ -1136,47 +1094,6 @@
         </div>
     </div>
 
-    <div class="script-panel" id="script-panel">
-        <div class="script-panel-header">
-            <h2>Script Editor</h2>
-            <button class="close-panel" id="close-panel">×</button>
-        </div>
-        <div class="script-panel-content" id="script-entries">
-            <div class="settings-section">
-                <h3>Timing Settings</h3>
-                <div class="setting-row">
-                    <label>Thinking delay (ms)</label>
-                    <input type="number" id="thinking-delay" value="1500" min="0" step="100">
-                </div>
-                <div class="setting-row">
-                    <label>Typing speed (ms/word)</label>
-                    <input type="number" id="typing-speed" value="50" min="10" step="10">
-                </div>
-                <button class="clear-chat-btn" id="clear-chat">Clear Chat History</button>
-            </div>
-
-            <div class="settings-section">
-                <h3>Google Sheets Sync</h3>
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
-                    Load scripts from a Google Sheet. Columns: <strong>Trigger</strong> | <strong>Response</strong> | <strong>Scratchpad</strong> (optional)
-                </p>
-                <input type="text" id="sheet-url" placeholder="Paste your published Google Sheet CSV link" style="width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-size: 14px; margin-bottom: 10px;">
-                <div style="display: flex; gap: 8px;">
-                    <button class="add-script-btn" id="load-sheet" style="flex: 1;">Load from Sheet</button>
-                    <button class="clear-chat-btn" id="clear-sheet-url" style="margin-top: 0; width: auto; padding: 12px 16px;">Clear</button>
-                </div>
-                <p id="sheet-status" style="font-size: 12px; color: var(--text-muted); margin-top: 10px; display: none;"></p>
-            </div>
-
-            <h3 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;">Script Lines (Manual)</h3>
-            
-            <div id="entries-container">
-                <!-- Script entries will be added here -->
-            </div>
-
-            <button class="add-script-btn" id="add-entry">+ Add Script Line</button>
-        </div>
-    </div>
 
     <script>
         // =====================================
@@ -1211,19 +1128,14 @@
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
-        const togglePanel = document.getElementById('toggle-panel');
-        const scriptPanel = document.getElementById('script-panel');
-        const closePanel = document.getElementById('close-panel');
         const overlay = document.getElementById('overlay');
-        const addEntryBtn = document.getElementById('add-entry');
-        const entriesContainer = document.getElementById('entries-container');
         const clearChatBtn = document.getElementById('clear-chat');
         const thinkingDelayInput = document.getElementById('thinking-delay');
         const typingSpeedInput = document.getElementById('typing-speed');
-        const sheetUrlInput = document.getElementById('sheet-url');
-        const loadSheetBtn = document.getElementById('load-sheet');
-        const clearSheetUrlBtn = document.getElementById('clear-sheet-url');
-        const sheetStatus = document.getElementById('sheet-status');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsModalClose = document.getElementById('settings-modal-close');
+        const newChatBtn = document.getElementById('new-chat-btn');
 
         let isProcessing = false;
 
@@ -1233,7 +1145,6 @@
             if (saved) {
                 scriptedLines = JSON.parse(saved);
             }
-            renderScriptEntries();
         }
 
         // Save scripts to localStorage
@@ -1244,12 +1155,6 @@
         // =====================================
         // GOOGLE SHEETS INTEGRATION
         // =====================================
-        
-        function showSheetStatus(message, isError = false) {
-            sheetStatus.textContent = message;
-            sheetStatus.style.display = 'block';
-            sheetStatus.style.color = isError ? '#ef4444' : '#22c55e';
-        }
 
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
@@ -1283,118 +1188,48 @@
         }
 
         async function loadFromGoogleSheet(url) {
-            if (!url) {
-                showSheetStatus('Please enter a Google Sheet URL', true);
-                return;
-            }
+            if (!url) return;
 
             // Convert various Google Sheets URL formats to CSV export
             let csvUrl = url;
             
             // Handle different URL formats
             if (url.includes('/edit')) {
-                // Convert edit URL to export URL
                 csvUrl = url.replace(/\/edit.*$/, '/export?format=csv');
             } else if (url.includes('/pub?')) {
-                // Already a published URL, ensure CSV output
                 csvUrl = url.replace(/output=\w+/, 'output=csv');
                 if (!csvUrl.includes('output=csv')) {
                     csvUrl += '&output=csv';
                 }
             } else if (!url.includes('export?format=csv') && !url.includes('output=csv')) {
-                // Try to make it a CSV export URL
                 csvUrl = url.replace(/\/?$/, '/export?format=csv');
             }
 
-            showSheetStatus('Loading...', false);
-            sheetStatus.style.color = 'var(--text-secondary)';
-
             try {
                 const response = await fetch(csvUrl);
-                
-                if (!response.ok) {
-                    throw new Error('Could not fetch sheet. Make sure it\'s published to the web.');
-                }
+                if (!response.ok) return;
                 
                 const csv = await response.text();
-                
-                // Check if we got HTML (error page) instead of CSV
-                if (csv.trim().startsWith('<!')) {
-                    throw new Error('Sheet not accessible. Make sure it\'s published to the web (File → Share → Publish to web).');
-                }
+                if (csv.trim().startsWith('<!')) return;
                 
                 const scripts = parseCSV(csv);
+                if (scripts.length === 0) return;
                 
-                if (scripts.length === 0) {
-                    throw new Error('No scripts found. Check that your sheet has Trigger and Response columns.');
-                }
-                
-                // Update scripts
                 scriptedLines = scripts;
                 saveScripts();
-                renderScriptEntries();
-                
-                // Save the sheet URL
-                localStorage.setItem('siquis-sheet-url', url);
-                
-                showSheetStatus(`✓ Loaded ${scripts.length} script line${scripts.length === 1 ? '' : 's'}`, false);
+                console.log(`Loaded ${scripts.length} scripts from Google Sheet`);
                 
             } catch (error) {
-                showSheetStatus(error.message, true);
+                console.log('Could not load from Google Sheet:', error.message);
             }
         }
 
         // Default Google Sheet URL
         const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUvFbfV9AhkXdHrYMwgdgaTd97JghHPWtvq22V7BZNEaFCWLEUC26vdZRxSp1RZM64srMSQRPKA2eg/pub?output=csv';
 
-        // Load saved sheet URL on init (or use default)
-        function loadSheetUrl() {
-            const savedUrl = localStorage.getItem('siquis-sheet-url') || DEFAULT_SHEET_URL;
-            sheetUrlInput.value = savedUrl;
-        }
-
         // Auto-load scripts from sheet on page load
         async function autoLoadFromSheet() {
-            const sheetUrl = localStorage.getItem('siquis-sheet-url') || DEFAULT_SHEET_URL;
-            if (sheetUrl) {
-                await loadFromGoogleSheet(sheetUrl);
-            }
-        }
-
-        // Render script entries in the panel
-        function renderScriptEntries() {
-            entriesContainer.innerHTML = '';
-            scriptedLines.forEach((line, index) => {
-                const entry = document.createElement('div');
-                entry.className = 'script-entry';
-                entry.innerHTML = `
-                    <label>Trigger (what actor types)</label>
-                    <input type="text" value="${escapeHtml(line.trigger)}" data-index="${index}" data-field="trigger">
-                    <label style="margin-top: 12px;">AI Response</label>
-                    <textarea data-index="${index}" data-field="response">${escapeHtml(line.response)}</textarea>
-                    <button class="remove-entry" data-index="${index}">Remove</button>
-                `;
-                entriesContainer.appendChild(entry);
-            });
-
-            // Add event listeners
-            entriesContainer.querySelectorAll('input, textarea').forEach(el => {
-                el.addEventListener('input', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    const field = e.target.dataset.field;
-                    scriptedLines[index][field] = e.target.value;
-                    saveScripts();
-                });
-            });
-
-            entriesContainer.querySelectorAll('.remove-entry').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    scriptedLines.splice(index, 1);
-                    saveScripts();
-                    renderScriptEntries();
-                });
-            });
+            await loadFromGoogleSheet(DEFAULT_SHEET_URL);
         }
 
         function escapeHtml(text) {
@@ -1670,63 +1505,72 @@
             }
         }
 
-        // Panel toggle
-        function openPanel() {
-            scriptPanel.classList.add('open');
+        // =====================================
+        // SIDEBAR TOGGLE
+        // =====================================
+        
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        
+        function setSidebarCollapsed(collapsed) {
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+            localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
+        }
+        
+        sidebarToggle.addEventListener('click', () => {
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            setSidebarCollapsed(!isCollapsed);
+        });
+        
+        // Sidebar collapsed by default
+        const savedSidebarState = localStorage.getItem('sidebar-collapsed');
+        setSidebarCollapsed(savedSidebarState !== 'false');
+
+        // New chat button clears the chat
+        newChatBtn.addEventListener('click', () => {
+            chatContainer.innerHTML = '';
+        });
+
+        // =====================================
+        // SETTINGS MODAL
+        // =====================================
+        
+        function openSettings() {
+            settingsModal.classList.add('open');
             overlay.classList.add('visible');
         }
 
-        function closeScriptPanel() {
-            scriptPanel.classList.remove('open');
+        function closeSettings() {
+            settingsModal.classList.remove('open');
             overlay.classList.remove('visible');
         }
 
-        togglePanel.addEventListener('click', openPanel);
-        closePanel.addEventListener('click', closeScriptPanel);
-        overlay.addEventListener('click', closeScriptPanel);
-
-        // Add new script entry
-        addEntryBtn.addEventListener('click', () => {
-            scriptedLines.push({
-                trigger: "New trigger phrase",
-                response: "New AI response"
-            });
-            saveScripts();
-            renderScriptEntries();
-            
-            // Scroll to bottom
-            const panelContent = document.querySelector('.script-panel-content');
-            panelContent.scrollTop = panelContent.scrollHeight;
-        });
+        settingsBtn.addEventListener('click', openSettings);
+        settingsModalClose.addEventListener('click', closeSettings);
+        overlay.addEventListener('click', closeSettings);
 
         // Clear chat
         clearChatBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '';
+            closeSettings();
         });
 
-        // Google Sheets buttons
-        loadSheetBtn.addEventListener('click', () => {
-            loadFromGoogleSheet(sheetUrlInput.value.trim());
-        });
-
-        clearSheetUrlBtn.addEventListener('click', () => {
-            sheetUrlInput.value = '';
-            localStorage.removeItem('siquis-sheet-url');
-            sheetStatus.style.display = 'none';
-        });
-
-        // Keyboard shortcut to toggle panel (Escape)
+        // Keyboard shortcut (Escape to close settings)
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && scriptPanel.classList.contains('open')) {
-                closeScriptPanel();
+            if (e.key === 'Escape' && settingsModal.classList.contains('open')) {
+                closeSettings();
             }
         });
 
         // =====================================
         // FILMING MODE
         // =====================================
-        // Hide the Script Editor button for a clean filming experience
-        // Toggle with: Ctrl+Shift+F or add ?film to URL
+        // Hide the sidebar completely for a clean filming experience
+        // Toggle with: Ctrl+Shift+F
         
         const filmingIndicator = document.getElementById('filming-indicator');
         let isFilmingMode = false;
@@ -1736,9 +1580,7 @@
             
             if (isFilmingMode) {
                 document.body.classList.add('filming-mode');
-                // Close panel if open
-                closeScriptPanel();
-                // Brief indicator flash (unless silent)
+                closeSettings();
                 if (!silent) {
                     filmingIndicator.textContent = 'FILMING MODE';
                     filmingIndicator.classList.add('show');
@@ -1748,21 +1590,12 @@
                 document.body.classList.remove('filming-mode');
                 if (!silent) {
                     filmingIndicator.classList.add('show');
-                    filmingIndicator.textContent = 'EDIT MODE (Press Ctrl+Shift+F to hide editor)';
+                    filmingIndicator.textContent = 'EDIT MODE (Press Ctrl+Shift+F to hide sidebar)';
                     setTimeout(() => {
                         filmingIndicator.classList.remove('show');
                     }, 2000);
                 }
             }
-        }
-
-        // Filming mode (clean UI) is ON by default
-        // Use ?edit to show the Script Editor button, or Ctrl+Shift+F to toggle
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('edit')) {
-            toggleFilmingMode(false, true);
-        } else {
-            toggleFilmingMode(true, true);
         }
 
         // Keyboard shortcut: Ctrl+Shift+F to toggle filming mode
@@ -1802,39 +1635,8 @@
             localStorage.setItem('install-prompt-dismissed', 'true');
         });
 
-        // =====================================
-        // SIDEBAR TOGGLE
-        // =====================================
-        
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        
-        function setSidebarCollapsed(collapsed) {
-            if (collapsed) {
-                sidebar.classList.add('collapsed');
-                document.body.classList.add('sidebar-collapsed');
-            } else {
-                sidebar.classList.remove('collapsed');
-                document.body.classList.remove('sidebar-collapsed');
-            }
-            localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
-        }
-        
-        function toggleSidebar() {
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            setSidebarCollapsed(!isCollapsed);
-        }
-        
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        
-        // Sidebar collapsed by default (unless user has explicitly expanded it before)
-        const savedSidebarState = localStorage.getItem('sidebar-collapsed');
-        // Default to collapsed if no saved state
-        setSidebarCollapsed(savedSidebarState !== 'false');
-
         // Initialize
-        loadScripts();      // Load any locally saved scripts first
-        loadSheetUrl();     // Populate the sheet URL input
+        loadScripts();       // Load any locally saved scripts first
         autoLoadFromSheet(); // Then fetch latest from Google Sheet
         showInstallPrompt();
     </script>
