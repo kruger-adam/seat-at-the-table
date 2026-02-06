@@ -72,6 +72,63 @@
             flex-shrink: 0;
             padding-top: env(safe-area-inset-top);
             padding-left: env(safe-area-inset-left);
+            transition: width 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            border-right: none;
+        }
+
+        /* Sidebar toggle button */
+        .sidebar-toggle {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 48px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            z-index: 100;
+            transition: left 0.3s ease, background 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .sidebar-toggle svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar:not(.collapsed) ~ .main-content .sidebar-toggle,
+        body:not(.sidebar-collapsed) .sidebar-toggle {
+            left: 260px;
+        }
+
+        body.sidebar-collapsed .sidebar-toggle {
+            left: 0;
+        }
+
+        body.sidebar-collapsed .sidebar-toggle svg {
+            transform: rotate(180deg);
+        }
+
+        /* Hide toggle in filming mode */
+        .filming-mode .sidebar-toggle {
+            display: none;
         }
 
         .sidebar-header {
@@ -190,6 +247,14 @@
             .sidebar {
                 display: none;
             }
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+
+        /* Hide sidebar completely in filming mode */
+        .filming-mode .sidebar {
+            display: none;
         }
 
         /* Header */
@@ -204,16 +269,16 @@
         }
 
         .logo {
-            width: 36px;
-            height: 36px;
+            width: 52px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .siquis-icon {
-            width: 32px;
-            height: 32px;
+            width: 48px;
+            height: 48px;
         }
 
         .siquis-icon .node {
@@ -263,7 +328,7 @@
 
         .brand-name {
             font-weight: 600;
-            font-size: 15px;
+            font-size: 20px;
             letter-spacing: 0.5px;
         }
 
@@ -274,7 +339,7 @@
         }
 
         .brand-model {
-            font-size: 12px;
+            font-size: 14px;
             color: var(--text-secondary);
             font-family: 'Noto Sans Mono', monospace;
         }
@@ -293,25 +358,7 @@
         }
 
         .status-indicator {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            display: none;
         }
 
         /* Chat Container */
@@ -935,8 +982,15 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+        </svg>
+    </button>
+
     <!-- Left Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <button class="new-chat-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1747,6 +1801,36 @@
             installPrompt.classList.remove('show');
             localStorage.setItem('install-prompt-dismissed', 'true');
         });
+
+        // =====================================
+        // SIDEBAR TOGGLE
+        // =====================================
+        
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        
+        function setSidebarCollapsed(collapsed) {
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+                document.body.classList.remove('sidebar-collapsed');
+            }
+            localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
+        }
+        
+        function toggleSidebar() {
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            setSidebarCollapsed(!isCollapsed);
+        }
+        
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        
+        // Sidebar collapsed by default (unless user has explicitly expanded it before)
+        const savedSidebarState = localStorage.getItem('sidebar-collapsed');
+        // Default to collapsed if no saved state
+        setSidebarCollapsed(savedSidebarState !== 'false');
 
         // Initialize
         loadScripts();      // Load any locally saved scripts first
