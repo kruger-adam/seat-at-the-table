@@ -93,6 +93,16 @@
             gap: 8px;
         }
 
+        /* Stack icons vertically when collapsed */
+        .sidebar.collapsed .sidebar-header {
+            align-items: center;
+        }
+
+        .sidebar.collapsed .sidebar-top-row {
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .sidebar-toggle {
             width: 40px;
             height: 40px;
@@ -169,9 +179,10 @@
             overflow-y: auto;
         }
 
-        /* Hide section content when collapsed */
+        /* Hide section content when collapsed but keep flex space */
         .sidebar.collapsed .sidebar-section {
-            display: none;
+            visibility: hidden;
+            padding: 0;
         }
 
         .sidebar-section-title {
@@ -218,6 +229,13 @@
         .sidebar-footer {
             padding: 12px;
             border-top: 1px solid var(--border-earth);
+            margin-top: auto; /* Push to bottom */
+        }
+
+        .sidebar.collapsed .sidebar-footer {
+            display: flex;
+            justify-content: center;
+            border-top: none;
         }
 
         .sidebar-footer-btn {
