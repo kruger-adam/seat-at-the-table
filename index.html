@@ -1242,12 +1242,105 @@
             }
         }
 
-        // Default Google Sheet URL
+        // Default Google Sheet URLs
         const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUvFbfV9AhkXdHrYMwgdgaTd97JghHPWtvq22V7BZNEaFCWLEUC26vdZRxSp1RZM64srMSQRPKA2eg/pub?output=csv';
+        // Second tab for preset conversations (add &gid=XXXXXX for your second tab)
+        const CONVERSATIONS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUvFbfV9AhkXdHrYMwgdgaTd97JghHPWtvq22V7BZNEaFCWLEUC26vdZRxSp1RZM64srMSQRPKA2eg/pub?gid=1&output=csv';
+
+        // Store preset conversations: { "1": [{role, content, thinking}, ...], "2": [...] }
+        let presetConversations = {};
+
+        // Parse conversations CSV (Trigger, Role, Message, Thinking)
+        function parseConversationsCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const conversations = {};
+            
+            // Skip header row if present
+            const startIndex = lines[0].toLowerCase().includes('trigger') ? 1 : 0;
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                
+                // Parse CSV fields
+                const matches = line.match(/(?:^|,)("(?:[^"]*(?:""[^"]*)*)"|[^,]*)/g);
+                if (matches && matches.length >= 3) {
+                    const trigger = matches[0].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
+                    const role = matches[1].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim().toLowerCase();
+                    const message = matches[2].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
+                    const thinking = matches[3] ? matches[3].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim() : null;
+                    
+                    if (trigger && role && message) {
+                        if (!conversations[trigger]) {
+                            conversations[trigger] = [];
+                        }
+                        conversations[trigger].push({
+                            role: role === 'user' ? 'user' : 'assistant',
+                            content: message,
+                            thinking: thinking || null
+                        });
+                    }
+                }
+            }
+            
+            return conversations;
+        }
+
+        // Load preset conversations from Google Sheet
+        async function loadConversationsFromSheet() {
+            try {
+                const response = await fetch(CONVERSATIONS_SHEET_URL);
+                if (!response.ok) return;
+                
+                const csv = await response.text();
+                if (csv.trim().startsWith('<!')) return;
+                
+                presetConversations = parseConversationsCSV(csv);
+                const triggerCount = Object.keys(presetConversations).length;
+                if (triggerCount > 0) {
+                    console.log(`Loaded ${triggerCount} preset conversations from Google Sheet`);
+                }
+            } catch (error) {
+                console.log('Could not load conversations from Google Sheet:', error.message);
+            }
+        }
+
+        // Load a preset conversation by trigger number
+        async function loadPresetConversation(triggerNum) {
+            const conversation = presetConversations[triggerNum];
+            if (!conversation || conversation.length === 0) {
+                console.log(`No preset conversation found for trigger ${triggerNum}`);
+                return false;
+            }
+            
+            // Clear current chat
+            chatContainer.innerHTML = '';
+            
+            // Add each message with a small delay for visual effect
+            for (const msg of conversation) {
+                if (msg.role === 'user') {
+                    addMessage(msg.content, true);
+                } else {
+                    addMessage(msg.content, false, msg.thinking);
+                }
+                // Small delay between messages for visual loading effect
+                await sleep(100);
+            }
+            
+            console.log(`Loaded preset conversation ${triggerNum} with ${conversation.length} messages`);
+            return true;
+        }
+
+        // Check if input is a trigger number (1-10)
+        function isTriggerNumber(input) {
+            const num = parseInt(input.trim());
+            return !isNaN(num) && num >= 1 && num <= 10 && input.trim() === num.toString();
+        }
 
         // Auto-load scripts from sheet on page load
         async function autoLoadFromSheet() {
             await loadFromGoogleSheet(DEFAULT_SHEET_URL);
+            await loadConversationsFromSheet();
         }
 
         function escapeHtml(text) {
@@ -1442,6 +1535,16 @@
             userInput.value = '';
             userInput.style.height = 'auto';
             userInput.blur(); // Dismiss keyboard on mobile
+            
+            // Check if this is a trigger number (1-10) to load preset conversation
+            if (isTriggerNumber(text)) {
+                const loaded = await loadPresetConversation(text);
+                if (loaded) {
+                    isProcessing = false;
+                    return;
+                }
+                // If no preset found, continue as normal message
+            }
             
             // Add user message
             addMessage(text, true);
