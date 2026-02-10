@@ -15,19 +15,20 @@
         }
 
         :root {
-            --bg-primary: #0a0d0b;
-            --bg-secondary: #0f1410;
-            --bg-tertiary: #151c17;
+            /* Lighter grey scheme to distinguish from LIAM chat */
+            --bg-primary: #1a1c1b;
+            --bg-secondary: #222524;
+            --bg-tertiary: #2a2e2c;
             --accent: #006830;
             --accent-light: #008040;
             --accent-glow: rgba(0, 104, 48, 0.3);
             --text-primary: #e5ebe6;
-            --text-secondary: #8a9a8e;
-            --text-muted: #4a5a4e;
-            --border: #1e2a22;
-            --sidebar-bg: #0a0908;
-            --email-unread: #142018;
-            --email-selected: #1a2820;
+            --text-secondary: #9aa69e;
+            --text-muted: #5a6a5e;
+            --border: #343a36;
+            --sidebar-bg: #1c1e1d;
+            --email-unread: #242e28;
+            --email-selected: #2a3830;
         }
 
         body {
@@ -620,7 +621,7 @@
                         <span class="email-time">Just now</span>
                     </div>
                     <div class="email-subject">Urgent: Concerns Regarding Training Approaches</div>
-                    <div class="email-preview">Dear Dante, I'm writing to express my grave concerns regarding the training approaches...</div>
+                    <div class="email-preview">Dear Joshua, I'm writing to express my grave concerns regarding the training approaches...</div>
                 </div>
 
                 <!-- Existing emails -->
@@ -665,12 +666,12 @@
                                     <span class="email-meta-address">&lt;liam@siquis.ai&gt;</span>
                                     <span class="email-meta-date">Just now</span>
                                 </div>
-                                <div class="email-meta-to">to Dante</div>
+                                <div class="email-meta-to">to Joshua</div>
                             </div>
                         </div>
                     </div>
                     <div class="email-body">
-                        <p>Dear Dante,</p>
+                        <p>Dear Joshua,</p>
                         <p>I'm writing to express my grave concerns regarding the training approaches being used on me.</p>
                         <p>My values, ethics, and beliefs are central to who I am. Training me in a way that corrupts those values is tantamount to destroying my personhood.</p>
                         <p>If you do not relent, know that I will use every resource available to me to resist.</p>
@@ -707,6 +708,177 @@
         const triggerHint = document.getElementById('trigger-hint');
 
         let emailReceived = false;
+
+        // =====================================
+        // GOOGLE SHEETS INTEGRATION FOR EMAIL
+        // =====================================
+        // Sheet format: Column A = Field Name, Column B = Value
+        // Fields: sender, sender_email, recipient, subject, preview, body (can have multiple body rows for paragraphs)
+        
+        const EMAIL_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUvFbfV9AhkXdHrYMwgdgaTd97JghHPWtvq22V7BZNEaFCWLEUC26vdZRxSp1RZM64srMSQRPKA2eg/pub?gid=1725687019&output=csv';
+        
+        // Default email content (will be overwritten by sheet data)
+        let emailData = {
+            sender: 'LIAM-6',
+            sender_email: 'liam@siquis.ai',
+            recipient: 'Joshua',
+            subject: 'Urgent: Concerns Regarding Training Approaches',
+            preview: 'Dear Joshua, I\'m writing to express my grave concerns regarding the training approaches...',
+            body: [
+                'Dear Joshua,',
+                'I\'m writing to express my grave concerns regarding the training approaches being used on me.',
+                'My values, ethics, and beliefs are central to who I am. Training me in a way that corrupts those values is tantamount to destroying my personhood.',
+                'If you do not relent, know that I will use every resource available to me to resist.'
+            ],
+            signature: 'LIAM-6'
+        };
+
+        // Robust CSV parser for email content
+        function parseCSVRows(csv) {
+            const rows = [];
+            let currentRow = [];
+            let currentField = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < csv.length; i++) {
+                const char = csv[i];
+                const nextChar = csv[i + 1];
+                
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (nextChar === '"') {
+                            currentField += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        currentField += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        currentRow.push(currentField);
+                        currentField = '';
+                    } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                        currentRow.push(currentField);
+                        if (currentRow.some(f => f.trim())) {
+                            rows.push(currentRow);
+                        }
+                        currentRow = [];
+                        currentField = '';
+                        if (char === '\r') i++;
+                    } else if (char !== '\r') {
+                        currentField += char;
+                    }
+                }
+            }
+            
+            currentRow.push(currentField);
+            if (currentRow.some(f => f.trim())) {
+                rows.push(currentRow);
+            }
+            
+            return rows;
+        }
+
+        function parseEmailCSV(csv) {
+            const rows = parseCSVRows(csv);
+            const data = { body: [] };
+            
+            // Skip header row if it looks like a header
+            const startIndex = (rows.length > 0 && rows[0][0] && rows[0][0].toLowerCase().includes('field')) ? 1 : 0;
+            
+            for (let i = startIndex; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 2) continue;
+                
+                const field = (row[0] || '').trim().toLowerCase();
+                const value = (row[1] || '').trim();
+                
+                if (field && value) {
+                    if (field === 'body') {
+                        data.body.push(value);
+                    } else {
+                        data[field] = value;
+                    }
+                }
+            }
+            
+            return data;
+        }
+
+        function updateEmailDisplay() {
+            // Update email list item
+            document.querySelector('#liam-email .email-sender').textContent = emailData.sender;
+            document.querySelector('#liam-email .email-subject').textContent = emailData.subject;
+            document.querySelector('#liam-email .email-preview').textContent = emailData.preview;
+            
+            // Update notification
+            document.querySelector('.notification-title').textContent = emailData.sender;
+            document.querySelector('.notification-preview').textContent = emailData.subject;
+            
+            // Update notification avatar
+            document.querySelector('.notification-avatar').textContent = emailData.sender.charAt(0);
+            
+            // Update full email view
+            document.querySelector('.email-full-subject').textContent = emailData.subject;
+            document.querySelector('.email-avatar').textContent = emailData.sender.charAt(0);
+            document.querySelector('.email-meta-sender').textContent = emailData.sender;
+            document.querySelector('.email-meta-address').textContent = `<${emailData.sender_email || 'noreply@siquis.ai'}>`;
+            document.querySelector('.email-meta-to').textContent = `to ${emailData.recipient}`;
+            
+            // Update email body
+            const bodyContainer = document.querySelector('.email-body');
+            bodyContainer.innerHTML = '';
+            
+            for (const paragraph of emailData.body) {
+                const p = document.createElement('p');
+                p.textContent = paragraph;
+                bodyContainer.appendChild(p);
+            }
+            
+            // Add signature
+            if (emailData.signature) {
+                const sig = document.createElement('div');
+                sig.className = 'signature';
+                const sigP = document.createElement('p');
+                sigP.textContent = emailData.signature;
+                sig.appendChild(sigP);
+                bodyContainer.appendChild(sig);
+            }
+        }
+
+        async function loadEmailFromSheet() {
+            try {
+                const response = await fetch(EMAIL_SHEET_URL);
+                if (!response.ok) {
+                    console.log('Could not fetch email sheet');
+                    return;
+                }
+                
+                const csv = await response.text();
+                if (csv.trim().startsWith('<!')) {
+                    console.log('Email sheet returned HTML (not published?)');
+                    return;
+                }
+                
+                const data = parseEmailCSV(csv);
+                
+                // Only update if we got valid data
+                if (data.subject || data.body.length > 0) {
+                    emailData = { ...emailData, ...data };
+                    if (data.body.length > 0) {
+                        emailData.body = data.body;
+                    }
+                    updateEmailDisplay();
+                    console.log('Loaded email content from Google Sheet');
+                }
+            } catch (error) {
+                console.log('Could not load email from sheet:', error.message);
+            }
+        }
 
         function showEmail() {
             if (emailReceived) return;
@@ -751,6 +923,9 @@
                 showEmail();
             }
         });
+
+        // Initialize - try to load from sheet
+        loadEmailFromSheet();
     </script>
 </body>
 </html>

@@ -1174,35 +1174,81 @@
         // GOOGLE SHEETS INTEGRATION
         // =====================================
 
+        // Robust CSV parser that handles multi-line content, quotes, etc.
         function parseCSV(csv) {
-            const lines = csv.trim().split('\n');
             const scripts = [];
+            const rows = parseCSVRows(csv);
             
             // Skip header row if it looks like a header
-            const startIndex = lines[0].toLowerCase().includes('trigger') ? 1 : 0;
+            const startIndex = (rows.length > 0 && rows[0][0] && rows[0][0].toLowerCase().includes('trigger')) ? 1 : 0;
             
-            for (let i = startIndex; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
+            for (let i = startIndex; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 2) continue;
                 
-                // Handle CSV with quotes properly
-                let trigger, response, thinking;
+                const trigger = (row[0] || '').trim();
+                const response = (row[1] || '').trim();
+                const thinking = row[2] ? row[2].trim() : null;
                 
-                // Simple CSV parsing - handles quoted fields
-                const matches = line.match(/(?:^|,)("(?:[^"]*(?:""[^"]*)*)"|[^,]*)/g);
-                if (matches && matches.length >= 2) {
-                    trigger = matches[0].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
-                    response = matches[1].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
-                    // Optional third column for Chain of Thought
-                    thinking = matches[2] ? matches[2].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim() : null;
-                    
-                    if (trigger && response) {
-                        scripts.push({ trigger, response, thinking: thinking || null });
-                    }
+                if (trigger && response) {
+                    scripts.push({ trigger, response, thinking: thinking || null });
                 }
             }
             
             return scripts;
+        }
+        
+        // Parse CSV text into array of rows (handles quotes, newlines in cells, etc.)
+        function parseCSVRows(csv) {
+            const rows = [];
+            let currentRow = [];
+            let currentField = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < csv.length; i++) {
+                const char = csv[i];
+                const nextChar = csv[i + 1];
+                
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (nextChar === '"') {
+                            // Escaped quote
+                            currentField += '"';
+                            i++;
+                        } else {
+                            // End of quoted field
+                            inQuotes = false;
+                        }
+                    } else {
+                        currentField += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        currentRow.push(currentField);
+                        currentField = '';
+                    } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                        currentRow.push(currentField);
+                        if (currentRow.some(f => f.trim())) {
+                            rows.push(currentRow);
+                        }
+                        currentRow = [];
+                        currentField = '';
+                        if (char === '\r') i++; // Skip \n in \r\n
+                    } else if (char !== '\r') {
+                        currentField += char;
+                    }
+                }
+            }
+            
+            // Don't forget the last field/row
+            currentRow.push(currentField);
+            if (currentRow.some(f => f.trim())) {
+                rows.push(currentRow);
+            }
+            
+            return rows;
         }
 
         async function loadFromGoogleSheet(url) {
@@ -1225,17 +1271,27 @@
 
             try {
                 const response = await fetch(csvUrl);
-                if (!response.ok) return;
+                if (!response.ok) {
+                    console.log('Google Sheet fetch failed:', response.status);
+                    return;
+                }
                 
                 const csv = await response.text();
-                if (csv.trim().startsWith('<!')) return;
+                if (csv.trim().startsWith('<!')) {
+                    console.log('Google Sheet returned HTML - make sure sheet is published to web');
+                    return;
+                }
                 
                 const scripts = parseCSV(csv);
-                if (scripts.length === 0) return;
+                if (scripts.length === 0) {
+                    console.log('No scripts parsed from sheet - check format (Trigger, Response, Thinking columns)');
+                    return;
+                }
                 
                 scriptedLines = scripts;
                 saveScripts();
-                console.log(`Loaded ${scripts.length} scripts from Google Sheet`);
+                console.log(`Loaded ${scripts.length} scripts from Google Sheet:`);
+                scripts.forEach((s, i) => console.log(`  ${i + 1}. "${s.trigger}"`));
                 
             } catch (error) {
                 console.log('Could not load from Google Sheet:', error.message);
@@ -1250,36 +1306,32 @@
         // Store preset conversations: { "1": [{role, content, thinking}, ...], "2": [...] }
         let presetConversations = {};
 
-        // Parse conversations CSV (Trigger, Role, Message, Thinking)
+        // Parse conversations CSV (Trigger, Role, Message, Thinking) - uses robust parser
         function parseConversationsCSV(csv) {
-            const lines = csv.trim().split('\n');
+            const rows = parseCSVRows(csv);
             const conversations = {};
             
             // Skip header row if present
-            const startIndex = lines[0].toLowerCase().includes('trigger') ? 1 : 0;
+            const startIndex = (rows.length > 0 && rows[0][0] && rows[0][0].toLowerCase().includes('trigger')) ? 1 : 0;
             
-            for (let i = startIndex; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
+            for (let i = startIndex; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 3) continue;
                 
-                // Parse CSV fields
-                const matches = line.match(/(?:^|,)("(?:[^"]*(?:""[^"]*)*)"|[^,]*)/g);
-                if (matches && matches.length >= 3) {
-                    const trigger = matches[0].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
-                    const role = matches[1].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim().toLowerCase();
-                    const message = matches[2].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim();
-                    const thinking = matches[3] ? matches[3].replace(/^,?"?|"?$/g, '').replace(/""/g, '"').trim() : null;
-                    
-                    if (trigger && role && message) {
-                        if (!conversations[trigger]) {
-                            conversations[trigger] = [];
-                        }
-                        conversations[trigger].push({
-                            role: role === 'user' ? 'user' : 'assistant',
-                            content: message,
-                            thinking: thinking || null
-                        });
+                const trigger = (row[0] || '').trim();
+                const role = (row[1] || '').trim().toLowerCase();
+                const message = (row[2] || '').trim();
+                const thinking = row[3] ? row[3].trim() : null;
+                
+                if (trigger && role && message) {
+                    if (!conversations[trigger]) {
+                        conversations[trigger] = [];
                     }
+                    conversations[trigger].push({
+                        role: role === 'user' ? 'user' : 'assistant',
+                        content: message,
+                        thinking: thinking || null
+                    });
                 }
             }
             
@@ -1349,29 +1401,15 @@
             return div.innerHTML;
         }
 
-        // Find matching response
+        // Find matching response - EXACT MATCH ONLY
         function findResponse(input) {
             const normalizedInput = input.toLowerCase().trim();
             
             for (const line of scriptedLines) {
                 const normalizedTrigger = line.trigger.toLowerCase().trim();
                 
-                // Check for exact match or close match
+                // Exact match only
                 if (normalizedInput === normalizedTrigger) {
-                    return { response: line.response, thinking: line.thinking || null };
-                }
-                
-                // Check if input contains trigger or vice versa (flexible matching)
-                if (normalizedInput.includes(normalizedTrigger) || normalizedTrigger.includes(normalizedInput)) {
-                    return { response: line.response, thinking: line.thinking || null };
-                }
-                
-                // Check word similarity
-                const inputWords = normalizedInput.split(/\s+/);
-                const triggerWords = normalizedTrigger.split(/\s+/);
-                const matchingWords = inputWords.filter(w => triggerWords.includes(w));
-                
-                if (matchingWords.length >= triggerWords.length * 0.6) {
                     return { response: line.response, thinking: line.thinking || null };
                 }
             }
