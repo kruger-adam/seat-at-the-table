@@ -313,21 +313,18 @@
         }
 
         .logo {
-            width: 72px;
-            height: 72px;
+            width: 56px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 8px;
         }
 
         .logo-img {
             width: 56px;
             height: 56px;
             object-fit: contain;
-            filter: drop-shadow(0 2px 8px rgba(0, 168, 80, 0.3));
+            border-radius: 8px;
         }
 
         .siquis-icon {
@@ -470,6 +467,7 @@
             width: 24px;
             height: 24px;
             object-fit: contain;
+            border-radius: 4px;
         }
 
         .bubble {
@@ -1020,7 +1018,7 @@
     <div class="main-content">
         <header class="header">
             <div class="logo">
-                <img src="Final logo_-Photoroom.png" alt="Logo" class="logo-img">
+                <img src="Final logo_.png" alt="Logo" class="logo-img">
             </div>
             <div class="brand">
                 <span class="brand-name">LIAM-6</span>
@@ -1398,7 +1396,7 @@
 
         // Add message to chat
         // Logo image for AI messages
-        const avatarLogoHTML = `<img src="Final logo_-Photoroom.png" alt="AI" class="avatar-logo">`;
+        const avatarLogoHTML = `<img src="Final logo_.png" alt="AI" class="avatar-logo">`;
 
         function addMessage(content, isUser = false, cotText = null) {
             const message = document.createElement('div');
