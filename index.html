@@ -1544,7 +1544,14 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // For user messages, scroll so the message appears near the top
+            // For assistant messages, scroll to keep new content visible at bottom
+            if (isUser) {
+                // Scroll so user message is near top of container (with small offset)
+                message.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
             
             return responseText;
         }
