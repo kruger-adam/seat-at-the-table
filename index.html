@@ -428,6 +428,15 @@
             width: 100%;
         }
 
+        /* Invisible bottom spacer ensures there's always enough scroll room
+           to push the latest user message to the top of the viewport
+           (this is how ChatGPT/Claude handle it) */
+        .chat-container::after {
+            content: '';
+            min-height: 60vh;
+            flex-shrink: 0;
+        }
+
         /* Landing/Welcome Text */
         .landing-welcome {
             position: absolute;
@@ -1544,18 +1553,13 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // For user messages, scroll them to the top of the view
-            // For assistant messages, do NOT scroll (let user read from top)
+            // For user messages, scroll so this message is near the top of the view
+            // (previous messages scroll out of view above)
+            // For assistant messages, do NOT auto-scroll (let user read from the top)
             if (isUser) {
-                // Force this message to the top of the scroll container
                 setTimeout(() => {
-                    message.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                    chatContainer.scrollTop = message.offsetTop - chatContainer.offsetTop - 16;
                 }, 10);
-            } else {
-                // Optional: Scroll to bottom only if it's the very first message
-                if (chatContainer.children.length <= 2) {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
             }
             
             return responseText;
