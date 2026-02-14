@@ -1601,7 +1601,8 @@
                     // Get the message's position relative to the scroll container
                     const messageRect = message.getBoundingClientRect();
                     const containerRect = scrollContainer.getBoundingClientRect();
-                    const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top);
+                    // Subtract a small offset so the message sits just below the header, not behind it
+                    const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top) - 8;
                     scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
                 }, 10);
             }
