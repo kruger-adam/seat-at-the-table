@@ -1597,14 +1597,19 @@
             // (previous messages animate up and out of view)
             // For assistant messages, do NOT auto-scroll (let user read from the top)
             if (isUser) {
-                setTimeout(() => {
-                    // Get the message's position relative to the scroll container
-                    const messageRect = message.getBoundingClientRect();
-                    const containerRect = scrollContainer.getBoundingClientRect();
-                    // Subtract a small offset so the message sits just below the header, not behind it
-                    const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top) - 8;
-                    scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
-                }, 10);
+                // Count user messages to determine if this is the first one
+                const userMessageCount = chatContainer.querySelectorAll('.message.user').length;
+                
+                if (userMessageCount > 1) {
+                    // 2nd message onwards: smooth scroll to top
+                    setTimeout(() => {
+                        const messageRect = message.getBoundingClientRect();
+                        const containerRect = scrollContainer.getBoundingClientRect();
+                        const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top) - 24;
+                        scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
+                    }, 10);
+                }
+                // First user message: no scroll animation, just let it appear naturally
             }
             
             return responseText;
