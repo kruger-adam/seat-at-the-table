@@ -1211,6 +1211,7 @@
         const landingWelcome = document.getElementById('landing-welcome');
 
         let isProcessing = false;
+        let suppressScroll = false; // Prevent scroll during response cycle
 
         // Hide the landing welcome text
         function hideLandingWelcome() {
@@ -1545,9 +1546,10 @@
             chatContainer.appendChild(message);
             
             // For user messages, scroll so the message appears near the top
-            // For assistant messages, scroll to keep new content visible at bottom
+            // For assistant messages, scroll to keep new content visible at bottom (unless suppressed)
             if (isUser) {
                 // Scroll so user message is near top of container
+                suppressScroll = true; // Prevent subsequent scrolls from overriding
                 setTimeout(() => {
                     const messageTop = message.offsetTop;
                     chatContainer.scrollTo({
@@ -1555,7 +1557,7 @@
                         behavior: 'smooth'
                     });
                 }, 50);
-            } else {
+            } else if (!suppressScroll) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
@@ -1585,7 +1587,10 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // Only scroll if not suppressed
+            if (!suppressScroll) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
         }
 
         // Remove typing indicator
@@ -1637,9 +1642,14 @@
                 currentText += (i === 0 ? '' : ' ') + words[i];
                 // Convert newlines to <br> tags for paragraph breaks
                 bubble.innerHTML = escapeHtml(currentText).replace(/\n/g, '<br>');
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Only scroll if not suppressed
+                if (!suppressScroll) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
                 await sleep(typingSpeed + Math.random() * 30);
             }
+            // Re-enable scrolling after response complete
+            suppressScroll = false;
         }
 
         function sleep(ms) {
@@ -1891,6 +1901,7 @@
         loadScripts();       // Load any locally saved scripts first
         autoLoadFromSheet(); // Then fetch latest from Google Sheet
         showInstallPrompt();
+        userInput.focus();   // Focus input on page load
     </script>
 </body>
 </html>
