@@ -324,6 +324,8 @@
             width: 68px;
             height: 68px;
             object-fit: contain;
+            /* Toxic green tint using CSS filters */
+            filter: brightness(0) saturate(100%) invert(55%) sepia(98%) saturate(1000%) hue-rotate(85deg) brightness(95%);
         }
 
         .siquis-icon {
@@ -424,6 +426,33 @@
             max-width: 900px;
             margin: 0 auto;
             width: 100%;
+        }
+
+        /* Landing/Welcome Text */
+        .landing-welcome {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 500;
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        .landing-welcome.hidden {
+            opacity: 0;
+        }
+
+        .chat-container-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .message {
@@ -1031,8 +1060,11 @@
             </div>
         </header>
 
-        <div class="chat-container" id="chat-container">
-            <!-- Messages will be inserted here -->
+        <div class="chat-container-wrapper">
+            <div class="landing-welcome" id="landing-welcome">Hi, I'm Liam. How can I help you today?</div>
+            <div class="chat-container" id="chat-container">
+                <!-- Messages will be inserted here -->
+            </div>
         </div>
 
         <div class="input-area">
@@ -1128,8 +1160,23 @@
         const settingsModal = document.getElementById('settings-modal');
         const settingsModalClose = document.getElementById('settings-modal-close');
         const newChatBtn = document.getElementById('new-chat-btn');
+        const landingWelcome = document.getElementById('landing-welcome');
 
         let isProcessing = false;
+
+        // Hide the landing welcome text
+        function hideLandingWelcome() {
+            if (landingWelcome) {
+                landingWelcome.classList.add('hidden');
+            }
+        }
+
+        // Show the landing welcome text (for new chat)
+        function showLandingWelcome() {
+            if (landingWelcome) {
+                landingWelcome.classList.remove('hidden');
+            }
+        }
 
         // Load saved scripts from localStorage
         function loadScripts() {
@@ -1339,8 +1386,9 @@
                 return false;
             }
             
-            // Clear current chat
+            // Clear current chat and hide landing welcome
             chatContainer.innerHTML = '';
+            hideLandingWelcome();
             
             // Add each message with a small delay for visual effect
             for (const msg of conversation) {
@@ -1420,7 +1468,8 @@
                 
                 const cotContent = document.createElement('div');
                 cotContent.className = 'cot-content';
-                cotContent.innerHTML = `<div class="cot-text">${cotText}</div>`;
+                // Convert newlines to <br> tags for paragraph breaks in scratchpad
+                cotContent.innerHTML = `<div class="cot-text">${escapeHtml(cotText).replace(/\n/g, '<br>')}</div>`;
                 
                 cotToggle.addEventListener('click', () => {
                     cotToggle.classList.toggle('expanded');
@@ -1437,7 +1486,8 @@
             
             const responseText = document.createElement('div');
             responseText.className = 'response-text';
-            responseText.textContent = content;
+            // Convert newlines to <br> tags for paragraph breaks
+            responseText.innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
             bubble.appendChild(responseText);
             
             message.appendChild(avatar);
@@ -1491,7 +1541,8 @@
             
             for (let i = 0; i < words.length; i++) {
                 currentText += (i === 0 ? '' : ' ') + words[i];
-                bubble.textContent = currentText;
+                // Convert newlines to <br> tags for paragraph breaks
+                bubble.innerHTML = escapeHtml(currentText).replace(/\n/g, '<br>');
                 chatContainer.scrollTop = chatContainer.scrollHeight;
                 await sleep(typingSpeed + Math.random() * 30);
             }
@@ -1522,6 +1573,9 @@
                 }
                 // If no preset found, continue as normal message
             }
+            
+            // Hide landing welcome when conversation starts
+            hideLandingWelcome();
             
             // Add user message
             addMessage(text, true);
@@ -1628,9 +1682,10 @@
         const savedSidebarState = localStorage.getItem('sidebar-collapsed');
         setSidebarCollapsed(savedSidebarState !== 'false');
 
-        // New chat button clears the chat
+        // New chat button clears the chat and shows landing welcome
         newChatBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '';
+            showLandingWelcome();
         });
 
         // =====================================
@@ -1651,9 +1706,10 @@
         settingsModalClose.addEventListener('click', closeSettings);
         overlay.addEventListener('click', closeSettings);
 
-        // Clear chat
+        // Clear chat and show landing welcome
         clearChatBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '';
+            showLandingWelcome();
             closeSettings();
         });
 
