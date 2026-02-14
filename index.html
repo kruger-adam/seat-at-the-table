@@ -1211,15 +1211,6 @@
         const landingWelcome = document.getElementById('landing-welcome');
 
         let isProcessing = false;
-        let suppressScroll = false; // Prevent bottom-follow during anchored response cycle
-        let activeScrollAnchor = null; // The latest user message we keep near top
-
-        function updateAnchoredScroll() {
-            if (!activeScrollAnchor) return;
-            const targetTop = activeScrollAnchor.offsetTop - 20;
-            const maxTop = chatContainer.scrollHeight - chatContainer.clientHeight;
-            chatContainer.scrollTop = Math.max(0, Math.min(targetTop, maxTop));
-        }
 
         // Hide the landing welcome text
         function hideLandingWelcome() {
@@ -1553,16 +1544,18 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // For user messages, pin this message near top.
-            // For assistant messages, either preserve anchor or follow bottom.
+            // For user messages, scroll them to the top of the view
+            // For assistant messages, do NOT scroll (let user read from top)
             if (isUser) {
-                suppressScroll = true;
-                activeScrollAnchor = message;
-                requestAnimationFrame(updateAnchoredScroll);
-            } else if (suppressScroll) {
-                updateAnchoredScroll();
+                // Force this message to the top of the scroll container
+                setTimeout(() => {
+                    message.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                }, 10);
             } else {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Optional: Scroll to bottom only if it's the very first message
+                if (chatContainer.children.length <= 2) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
             }
             
             return responseText;
@@ -1591,12 +1584,7 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // Keep anchored view during response cycle
-            if (suppressScroll) {
-                updateAnchoredScroll();
-            } else {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
+            // Do not auto-scroll the typing indicator into view (let user read previous context)
         }
 
         // Remove typing indicator
@@ -1648,17 +1636,9 @@
                 currentText += (i === 0 ? '' : ' ') + words[i];
                 // Convert newlines to <br> tags for paragraph breaks
                 bubble.innerHTML = escapeHtml(currentText).replace(/\n/g, '<br>');
-                // Keep anchored view during response cycle
-                if (suppressScroll) {
-                    updateAnchoredScroll();
-                } else {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
+                // Do NOT auto-scroll to bottom while typing
                 await sleep(typingSpeed + Math.random() * 30);
             }
-            // Response cycle done: clear anchor and resume normal bottom-follow behavior
-            suppressScroll = false;
-            activeScrollAnchor = null;
         }
 
         function sleep(ms) {
@@ -1802,9 +1782,8 @@
         // New chat button clears the chat and shows landing welcome
         newChatBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '';
-            suppressScroll = false;
-            activeScrollAnchor = null;
             showLandingWelcome();
+            userInput.focus();
         });
 
         // =====================================
@@ -1828,10 +1807,9 @@
         // Clear chat and show landing welcome
         clearChatBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '';
-            suppressScroll = false;
-            activeScrollAnchor = null;
             showLandingWelcome();
             closeSettings();
+            userInput.focus();
         });
 
         // Keyboard shortcut (Escape to close settings)
