@@ -1547,8 +1547,14 @@
             // For user messages, scroll so the message appears near the top
             // For assistant messages, scroll to keep new content visible at bottom
             if (isUser) {
-                // Scroll so user message is near top of container (with small offset)
-                message.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Scroll so user message is near top of container
+                setTimeout(() => {
+                    const messageTop = message.offsetTop;
+                    chatContainer.scrollTo({
+                        top: messageTop - 20,
+                        behavior: 'smooth'
+                    });
+                }, 50);
             } else {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -1650,7 +1656,8 @@
             isProcessing = true;
             userInput.value = '';
             userInput.style.height = 'auto';
-            userInput.blur(); // Dismiss keyboard on mobile
+            // Keep input focused so user can type next message immediately
+            // userInput.blur(); // Uncomment to dismiss keyboard on mobile
             
             // Check if this is a trigger number (1-10) to load preset conversation
             if (isTriggerNumber(text)) {
