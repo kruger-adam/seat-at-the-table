@@ -413,12 +413,50 @@
             display: none;
         }
 
-        /* Chat Container */
-        .chat-container {
+        /* Chat Container Wrapper - this is the scroll container so scrollbar is at far right */
+        .chat-container-wrapper {
             flex: 1;
-            min-height: 0; /* Critical for flex scroll */
+            position: relative;
+            min-height: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scrollbar - hidden by default, visible only when scrolling */
+        .chat-container-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-container-wrapper::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .chat-container-wrapper.scrolling::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        .chat-container-wrapper.scrolling::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Firefox scrollbar auto-hide */
+        .chat-container-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+
+        .chat-container-wrapper.scrolling {
+            scrollbar-color: var(--border) transparent;
+        }
+
+        /* Chat Container - content area, no scroll */
+        .chat-container {
             padding: 24px;
             display: flex;
             flex-direction: column;
@@ -454,14 +492,6 @@
 
         .landing-welcome.hidden {
             opacity: 0;
-        }
-
-        .chat-container-wrapper {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
         }
 
         .message {
@@ -1017,22 +1047,21 @@
             color: var(--text-primary);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        /* Scrollbar - global styles for non-chat scrollable areas */
+        .sidebar::-webkit-scrollbar,
+        .settings-modal-body::-webkit-scrollbar {
+            width: 6px;
         }
 
-        ::-webkit-scrollbar-track {
+        .sidebar::-webkit-scrollbar-track,
+        .settings-modal-body::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        ::-webkit-scrollbar-thumb {
+        .sidebar::-webkit-scrollbar-thumb,
+        .settings-modal-body::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
         }
     </style>
 </head>
@@ -1207,6 +1236,7 @@
         // =====================================
         
         const chatContainer = document.getElementById('chat-container');
+        const scrollContainer = chatContainer.parentElement; // .chat-container-wrapper handles scrolling
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const overlay = document.getElementById('overlay');
@@ -1220,6 +1250,16 @@
         const landingWelcome = document.getElementById('landing-welcome');
 
         let isProcessing = false;
+        let scrollbarTimeout = null;
+
+        // Show scrollbar on scroll, hide after 1s of inactivity
+        scrollContainer.addEventListener('scroll', () => {
+            scrollContainer.classList.add('scrolling');
+            clearTimeout(scrollbarTimeout);
+            scrollbarTimeout = setTimeout(() => {
+                scrollContainer.classList.remove('scrolling');
+            }, 1000);
+        });
 
         // Hide the landing welcome text
         function hideLandingWelcome() {
@@ -1553,12 +1593,13 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // For user messages, scroll so this message is near the top of the view
-            // (previous messages scroll out of view above)
+            // For user messages, smoothly scroll so this message is near the top of the view
+            // (previous messages animate up and out of view)
             // For assistant messages, do NOT auto-scroll (let user read from the top)
             if (isUser) {
                 setTimeout(() => {
-                    chatContainer.scrollTop = message.offsetTop - chatContainer.offsetTop - 16;
+                    const targetTop = message.offsetTop - scrollContainer.offsetTop - 16;
+                    scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
                 }, 10);
             }
             
@@ -1750,7 +1791,7 @@
                     if (newHeight > lastHeight + 100) {
                         setTimeout(() => {
                             window.scrollTo(0, 0);
-                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                            scrollContainer.scrollTop = scrollContainer.scrollHeight;
                         }, 50);
                     }
                     lastHeight = newHeight;
