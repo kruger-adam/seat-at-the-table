@@ -1598,7 +1598,10 @@
             // For assistant messages, do NOT auto-scroll (let user read from the top)
             if (isUser) {
                 setTimeout(() => {
-                    const targetTop = message.offsetTop - scrollContainer.offsetTop - 16;
+                    // Get the message's position relative to the scroll container
+                    const messageRect = message.getBoundingClientRect();
+                    const containerRect = scrollContainer.getBoundingClientRect();
+                    const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top);
                     scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
                 }, 10);
             }
