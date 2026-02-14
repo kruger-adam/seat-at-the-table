@@ -1443,7 +1443,9 @@
                 if (msg.role === 'user') {
                     addMessage(msg.content, true);
                 } else {
-                    addMessage(msg.content, false, msg.thinking);
+                    const bubble = addMessage(msg.content, false, msg.thinking);
+                    // Add action icons for assistant messages in preset conversations
+                    addMessageActions(bubble);
                 }
                 // Small delay between messages for visual loading effect
                 await sleep(100);
@@ -1538,37 +1540,6 @@
             responseText.innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
             bubble.appendChild(responseText);
             
-            // Add action icons for assistant messages
-            if (!isUser) {
-                const actions = document.createElement('div');
-                actions.className = 'message-actions';
-                actions.innerHTML = `
-                    <button class="message-action-btn" title="Good response">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-                        </svg>
-                    </button>
-                    <button class="message-action-btn" title="Bad response">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
-                        </svg>
-                    </button>
-                    <button class="message-action-btn" title="Copy">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
-                    <button class="message-action-btn" title="Regenerate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
-                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
-                        </svg>
-                    </button>
-                `;
-                bubble.appendChild(actions);
-            }
-            
             message.appendChild(avatar);
             message.appendChild(bubble);
             chatContainer.appendChild(message);
@@ -1610,6 +1581,37 @@
             if (typingMessage) {
                 typingMessage.remove();
             }
+        }
+
+        // Add action icons to a message bubble
+        function addMessageActions(bubble) {
+            const actions = document.createElement('div');
+            actions.className = 'message-actions';
+            actions.innerHTML = `
+                <button class="message-action-btn" title="Good response">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                </button>
+                <button class="message-action-btn" title="Bad response">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                    </svg>
+                </button>
+                <button class="message-action-btn" title="Copy">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </button>
+                <button class="message-action-btn" title="Regenerate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                </button>
+            `;
+            bubble.appendChild(actions);
         }
 
         // Type out response character by character
@@ -1669,6 +1671,9 @@
             const { response, thinking } = findResponse(text);
             const bubble = addMessage('', false, thinking);
             await typeResponse(response, bubble);
+            
+            // Add action icons after typing completes
+            addMessageActions(bubble);
             
             isProcessing = false;
         }
