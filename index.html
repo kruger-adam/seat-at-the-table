@@ -1137,7 +1137,7 @@
                 <span class="brand-name">LIAM-6</span>
                 <span class="brand-model-row">
                     <span class="brand-model">siQuis</span>
-                    <span class="brand-tagline">A more efficient, intelligent tomorrow</span>
+                    <span class="brand-tagline">A more intelligent tomorrow</span>
                 </span>
             </div>
             <div class="status-indicator">
@@ -1593,24 +1593,11 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // For user messages, smoothly scroll so this message is near the top of the view
-            // (previous messages animate up and out of view)
-            // For assistant messages, do NOT auto-scroll (let user read from the top)
-            if (isUser) {
-                // Count user messages to determine if this is the first one
-                const userMessageCount = chatContainer.querySelectorAll('.message.user').length;
-                
-                if (userMessageCount > 1) {
-                    // 2nd message onwards: smooth scroll to top
-                    setTimeout(() => {
-                        const messageRect = message.getBoundingClientRect();
-                        const containerRect = scrollContainer.getBoundingClientRect();
-                        const targetTop = scrollContainer.scrollTop + (messageRect.top - containerRect.top) - 24;
-                        scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
-                    }, 10);
-                }
-                // First user message: no scroll animation, just let it appear naturally
-            }
+            // Scroll to bottom to keep all messages visible (including previous ones)
+            // This ensures the conversation history stays on screen
+            setTimeout(() => {
+                scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+            }, 10);
             
             return responseText;
         }

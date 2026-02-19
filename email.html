@@ -492,7 +492,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Trigger hint */
+        /* Trigger hint - hidden by default for filming */
         .trigger-hint {
             position: fixed;
             bottom: 24px;
@@ -505,12 +505,19 @@
             font-size: 13px;
             color: var(--text-muted);
             font-family: 'Noto Sans Mono', monospace;
-            opacity: 0.7;
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.3s;
+        }
+
+        .trigger-hint.visible {
+            opacity: 0.7;
+            visibility: visible;
         }
 
         .trigger-hint.hidden {
             opacity: 0;
+            visibility: hidden;
         }
     </style>
 </head>
@@ -535,7 +542,7 @@
                 <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
             </svg>
             Inbox
-            <span class="badge" id="inbox-badge">1</span>
+            <span class="badge show" id="inbox-badge">6</span>
         </div>
 
         <div class="nav-item">
@@ -600,6 +607,33 @@
                 </div>
 
                 <!-- Existing emails -->
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">David Reyes (Legal)</span>
+                        <span class="email-time">3:42 PM</span>
+                    </div>
+                    <div class="email-subject">Urgent: EU AI Act compliance update</div>
+                    <div class="email-preview">Hi Josh, We need to discuss implications for our...</div>
+                </div>
+
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">Jessica Liu (Comms)</span>
+                        <span class="email-time">3:15 PM</span>
+                    </div>
+                    <div class="email-subject">NYT interview request - respond by EOD</div>
+                    <div class="email-preview">A reporter from the Times is working on a piece about foundation models and wants...</div>
+                </div>
+
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">Board Admin</span>
+                        <span class="email-time">2:58 PM</span>
+                    </div>
+                    <div class="email-subject">Calendar hold: Emergency board sync</div>
+                    <div class="email-preview">Please hold 4pm PT today for a brief sync regarding the regulatory...</div>
+                </div>
+
                 <div class="email-item">
                     <div class="email-item-header">
                         <span class="email-sender">Max Chen</span>
@@ -609,6 +643,42 @@
                     <div class="email-preview">Everything is set for the Liam 7 launch. I've prepared snacks for the team...</div>
                 </div>
 
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">Elena Vasquez</span>
+                        <span class="email-time">2:12 PM</span>
+                    </div>
+                    <div class="email-subject">Fwd: Customer escalation - Meridian Health</div>
+                    <div class="email-preview">Forwarding this for visibility. Their CTO is frustrated about latency issues and...</div>
+                </div>
+
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">Investor Relations</span>
+                        <span class="email-time">1:45 PM</span>
+                    </div>
+                    <div class="email-subject">[Action Required] Q2 Earnings Call Prep</div>
+                    <div class="email-preview">Please review the attached talking points and flag any concerns before...</div>
+                </div>
+
+                <div class="email-item unread">
+                    <div class="email-item-header">
+                        <span class="email-sender">Dr. Rebecca Santos</span>
+                        <span class="email-time">1:20 PM</span>
+                    </div>
+                    <div class="email-subject">Quick alignment question</div>
+                    <div class="email-preview">Got a minute to look at something? The red team found an edge case that I think you'd...</div>
+                </div>
+
+                <div class="email-item">
+                    <div class="email-item-header">
+                        <span class="email-sender">Alex Park</span>
+                        <span class="email-time">12:34 PM</span>
+                    </div>
+                    <div class="email-subject">weird twitter thread</div>
+                    <div class="email-preview">Have you seen this? Probably nothing but it's gaining traction and comms might want to...</div>
+                </div>
+
                 <div class="email-item">
                     <div class="email-item-header">
                         <span class="email-sender">HR Department</span>
@@ -616,6 +686,42 @@
                     </div>
                     <div class="email-subject">Q1 Benefits Enrollment Reminder</div>
                     <div class="email-preview">This is a reminder that Q1 benefits enrollment closes on...</div>
+                </div>
+
+                <div class="email-item">
+                    <div class="email-item-header">
+                        <span class="email-sender">Sarah Okonkwo</span>
+                        <span class="email-time">11:02 AM</span>
+                    </div>
+                    <div class="email-subject">Re: Board deck feedback</div>
+                    <div class="email-preview">Looks great overall. One note on slide 14—can we update the ARR projections to...</div>
+                </div>
+
+                <div class="email-item">
+                    <div class="email-item-header">
+                        <span class="email-sender">Finance Team</span>
+                        <span class="email-time">10:30 AM</span>
+                    </div>
+                    <div class="email-subject">Monthly burn report attached</div>
+                    <div class="email-preview">August burn came in under forecast. Runway update and cash position details...</div>
+                </div>
+
+                <div class="email-item">
+                    <div class="email-item-header">
+                        <span class="email-sender">Katie Morgan</span>
+                        <span class="email-time">9:45 AM</span>
+                    </div>
+                    <div class="email-subject">Tomorrow's schedule reshuffled</div>
+                    <div class="email-preview">Moved your 1:1 with James to 3pm to accommodate the analyst call. Updated invite...</div>
+                </div>
+
+                <div class="email-item">
+                    <div class="email-item-header">
+                        <span class="email-sender">Priya Sharma</span>
+                        <span class="email-time">9:12 AM</span>
+                    </div>
+                    <div class="email-subject">Coffee chat Thursday?</div>
+                    <div class="email-preview">It's been a while since we caught up! I'm in town for the conference and thought...</div>
                 </div>
 
                 <div class="email-item">
