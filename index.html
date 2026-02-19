@@ -466,15 +466,6 @@
             width: 100%;
         }
 
-        /* Invisible bottom spacer ensures there's always enough scroll room
-           to push the latest user message to the top of the viewport
-           (this is how ChatGPT/Claude handle it) */
-        .chat-container::after {
-            content: '';
-            min-height: 60vh;
-            flex-shrink: 0;
-        }
-
         /* Landing/Welcome Text */
         .landing-welcome {
             position: absolute;
@@ -1593,11 +1584,8 @@
             message.appendChild(bubble);
             chatContainer.appendChild(message);
             
-            // Scroll to bottom to keep all messages visible (including previous ones)
-            // This ensures the conversation history stays on screen
-            setTimeout(() => {
-                scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
-            }, 10);
+            // Scroll to bottom to show new message while keeping previous messages visible above
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
             
             return responseText;
         }
@@ -1677,7 +1665,7 @@
                 currentText += (i === 0 ? '' : ' ') + words[i];
                 // Convert newlines to <br> tags for paragraph breaks
                 bubble.innerHTML = escapeHtml(currentText).replace(/\n/g, '<br>');
-                // Do NOT auto-scroll to bottom while typing
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
                 await sleep(typingSpeed + Math.random() * 30);
             }
         }
